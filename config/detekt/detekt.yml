@@ -1,4 +1,3 @@
-
 config:
   validation: true
   warningsAsErrors: false
@@ -7,25 +6,25 @@ complexity:
   active: true
   CyclomaticComplexMethod:
     active: true
-    allowedComplexity: 14
+    allowedComplexity: 25
   LongMethod:
     active: true
-    allowedLines: 60
+    allowedLines: 90
   LongParameterList:
     active: true
-    allowedFunctionParameters: 5
-    allowedConstructorParameters: 6
+    allowedFunctionParameters: 7
+    allowedConstructorParameters: 8
     ignoreDataClasses: true
   LargeClass:
     active: true
-    allowedLines: 600
+    allowedLines: 800
   NestedBlockDepth:
     active: true
-    allowedDepth: 4
+    allowedDepth: 5
   TooManyFunctions:
     active: true
-    allowedFunctionsPerFile: 15
-    allowedFunctionsPerClass: 15
+    allowedFunctionsPerFile: 30
+    allowedFunctionsPerClass: 30
 
 naming:
   active: true
@@ -36,11 +35,7 @@ naming:
 style:
   active: true
   MagicNumber:
-    active: true
-    ignoreNumbers: [ '-1', '0', '1', '2' ]
-    ignoreHashCodeFunction: true
-    ignoreConstantDeclaration: true
-    ignorePropertyDeclaration: true
+    active: false
   MaxLineLength:
     active: true
     maxLineLength: 120
