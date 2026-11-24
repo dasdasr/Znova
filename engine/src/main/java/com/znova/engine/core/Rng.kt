@@ -3,7 +3,7 @@ package com.znova.engine.core
 
 class Rng(
     private val seed: Long,
-    initialDrawCount: Long = 0L
+    initialDrawCount: Long = 0L,
 ) {
     var draws: Long = initialDrawCount
         private set
@@ -19,9 +19,7 @@ class Rng(
         return value xor (value ushr 31)
     }
 
-    fun nextDouble(): Double {
-        return (nextLong() ushr 11) * (1.0 / (1L shl 53))
-    }
+    fun nextDouble(): Double = (nextLong() ushr 11) * (1.0 / (1L shl 53))
 
     fun nextInt(bound: Int): Int {
         require(bound > 0) { "Bound must be positive" }
@@ -29,17 +27,14 @@ class Rng(
         return ((nextLong() ushr 1) % bound).toInt()
     }
 
-    fun chance(probability: Double): Boolean {
-        return nextDouble() < probability
-    }
+    fun chance(probability: Double): Boolean = nextDouble() < probability
 
-    fun <T> pick(items: List<T>): T {
-        return items[nextInt(items.size)]
-    }
+    fun <T> pick(items: List<T>): T = items[nextInt(items.size)]
 
+    @Suppress("ReturnCount")
     fun <T> weighted(
         items: List<T>,
-        weight: (T) -> Double
+        weight: (T) -> Double,
     ): T? {
         var totalWeight = 0.0
 

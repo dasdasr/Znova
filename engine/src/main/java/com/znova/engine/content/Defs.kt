@@ -1,7 +1,22 @@
 package com.znova.engine.content
 
-import com.znova.engine.core.*
-import com.znova.engine.rules.*
+import com.znova.engine.core.AchievementId
+import com.znova.engine.core.ActivityId
+import com.znova.engine.core.ChoiceId
+import com.znova.engine.core.CountryId
+import com.znova.engine.core.EventId
+import com.znova.engine.core.FocusId
+import com.znova.engine.core.LawKey
+import com.znova.engine.core.LegacyId
+import com.znova.engine.core.OriginId
+import com.znova.engine.core.Rng
+import com.znova.engine.core.SkillKey
+import com.znova.engine.core.TrackerId
+import com.znova.engine.core.UnlockId
+import com.znova.engine.rules.Condition
+import com.znova.engine.rules.Effect
+import com.znova.engine.rules.Modifier
+import com.znova.engine.rules.SkillCheck
 import com.znova.engine.state.Tier
 
 interface Unlockable {
@@ -10,12 +25,15 @@ interface Unlockable {
 
 fun Unlockable.isAvailable(unlocks: Set<UnlockId>): Boolean = requiresUnlock == null || requiresUnlock in unlocks
 
-data class WeightRule(val condition: Condition, val multiplier: Double)
+data class WeightRule(
+    val condition: Condition,
+    val multiplier: Double,
+)
 
 data class ChoiceDef(
     val id: ChoiceId,
     val label: String,
-     val visibleWhen: List<Condition> = emptyList(),
+    val visibleWhen: List<Condition> = emptyList(),
     val enabledWhen: List<Condition> = emptyList(),
     val lockedHint: String? = null,
     val check: SkillCheck? = null,
@@ -67,7 +85,10 @@ data class ThoughtDef(
     val effects: List<Effect> = emptyList(),
 )
 
-data class NamePool(val first: List<String>, val last: List<String>) {
+data class NamePool(
+    val first: List<String>,
+    val last: List<String>,
+) {
     fun pick(rng: Rng): String = rng.pick(first) + " " + rng.pick(last)
 }
 
@@ -112,13 +133,25 @@ data class AchievementDef(
     val hintWhen: Condition? = null,
 )
 
-data class TitleDef(val text: String, val priority: Int, val conditions: List<Condition>)
+data class TitleDef(
+    val text: String,
+    val priority: Int,
+    val conditions: List<Condition>,
+)
 
 enum class UnlockKind { START, CONTENT, MECHANIC, LEGACY }
 
-data class UnlockDef(val id: UnlockId, val kind: UnlockKind, val name: String, val description: String = "")
+data class UnlockDef(
+    val id: UnlockId,
+    val kind: UnlockKind,
+    val name: String,
+    val description: String = "",
+)
 
-data class TrackerDef(val id: TrackerId, val condition: Condition)
+data class TrackerDef(
+    val id: TrackerId,
+    val condition: Condition,
+)
 
 data class FocusDef(
     val id: FocusId,

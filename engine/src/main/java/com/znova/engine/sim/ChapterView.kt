@@ -1,6 +1,9 @@
 package com.znova.engine.sim
 
-import com.znova.engine.core.*
+import com.znova.engine.core.ActivityId
+import com.znova.engine.core.ChoiceId
+import com.znova.engine.core.EventId
+import com.znova.engine.core.SkillKey
 import com.znova.engine.state.Card
 import com.znova.engine.state.Phase
 import com.znova.engine.state.Tier
@@ -16,9 +19,18 @@ data class ChapterView(
     val slots: Int,
 )
 
-data class CheckPreview(val skill: SkillKey, val difficulty: Int, val chancePercent: Int)
+data class CheckPreview(
+    val skill: SkillKey,
+    val difficulty: Int,
+    val chancePercent: Int,
+)
 
-data class DecisionView(val eventId: EventId, val tier: Tier, val text: String, val choices: List<ChoiceView>)
+data class DecisionView(
+    val eventId: EventId,
+    val tier: Tier,
+    val text: String,
+    val choices: List<ChoiceView>,
+)
 
 data class ChoiceView(
     val id: ChoiceId,

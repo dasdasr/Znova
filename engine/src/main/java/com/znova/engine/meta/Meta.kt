@@ -1,8 +1,22 @@
 package com.znova.engine.meta
 
-import com.znova.engine.content.*
-import com.znova.engine.core.*
+import com.znova.engine.content.AchievementDef
+import com.znova.engine.content.CountryDef
+import com.znova.engine.content.FocusDef
+import com.znova.engine.content.LegacyDef
+import com.znova.engine.content.OriginDef
+import com.znova.engine.content.UnlockDef
+import com.znova.engine.core.AchievementId
+import com.znova.engine.core.CounterKey
+import com.znova.engine.core.CountryId
+import com.znova.engine.core.FlagKey
+import com.znova.engine.core.FocusId
+import com.znova.engine.core.LegacyId
+import com.znova.engine.core.OriginId
+import com.znova.engine.core.TagKey
+import com.znova.engine.core.UnlockId
 import com.znova.engine.state.ChronicleEntry
+import com.znova.engine.state.WorldDate
 
 data class LifeSummary(
     val name: String,

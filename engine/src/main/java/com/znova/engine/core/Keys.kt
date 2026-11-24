@@ -1,37 +1,84 @@
 package com.znova.engine.core
 
 @JvmInline
-value class StatKey(val id: String)
+value class StatKey(
+    val id: String,
+)
+
 @JvmInline
-value class SkillKey(val id: String)
+value class SkillKey(
+    val id: String,
+)
+
 @JvmInline
-value class ViewKey(val id: String)
+value class ViewKey(
+    val id: String,
+)
+
 @JvmInline
-value class TagKey(val id: String)
+value class TagKey(
+    val id: String,
+)
+
 @JvmInline
-value class FlagKey(val id: String)
+value class FlagKey(
+    val id: String,
+)
+
 @JvmInline
-value class RoleKey(val id: String)
+value class RoleKey(
+    val id: String,
+)
+
 @JvmInline
-value class LawKey(val id: String)
+value class LawKey(
+    val id: String,
+)
+
 @JvmInline
-value class CountryId(val id: String)
+value class CountryId(
+    val id: String,
+)
+
 @JvmInline
-value class OriginId(val id: String)
+value class OriginId(
+    val id: String,
+)
+
 @JvmInline
-value class EventId(val id: String)
+value class EventId(
+    val id: String,
+)
+
 @JvmInline
-value class ChoiceId(val id: String)
+value class ChoiceId(
+    val id: String,
+)
+
 @JvmInline
-value class ActivityId(val id: String)
+value class ActivityId(
+    val id: String,
+)
+
 @JvmInline
-value class LegacyId(val id: String)
+value class LegacyId(
+    val id: String,
+)
+
 @JvmInline
-value class AchievementId(val id: String)
+value class AchievementId(
+    val id: String,
+)
+
 @JvmInline
-value class UnlockId(val id: String)
+value class UnlockId(
+    val id: String,
+)
+
 @JvmInline
-value class NpcId(val id: String)
+value class NpcId(
+    val id: String,
+)
 
 object Stats {
     val BODY = StatKey("body")
@@ -48,16 +95,17 @@ object Skills {
     val CRAFT = SkillKey("craft")
     val PHYSICALITY = SkillKey("physicality")
     val ADAPTABILITY = SkillKey("adaptability")
-    val ALL = listOf(
-        AWARENESS,
-        INTELLECT,
-        EXPRESSION,
-        RAPPORT,
-        INFLUENCE,
-        CRAFT,
-        PHYSICALITY,
-        ADAPTABILITY
-    )
+    val ALL =
+        listOf(
+            AWARENESS,
+            INTELLECT,
+            EXPRESSION,
+            RAPPORT,
+            INFLUENCE,
+            CRAFT,
+            PHYSICALITY,
+            ADAPTABILITY,
+        )
 }
 
 object Views {
@@ -77,8 +125,16 @@ object Balance {
 }
 
 @JvmInline
-value class CounterKey(val id: String)
+value class CounterKey(
+    val id: String,
+)
+
 @JvmInline
-value class TrackerId(val id: String)
+value class TrackerId(
+    val id: String,
+)
+
 @JvmInline
-value class FocusId(val id: String)
+value class FocusId(
+    val id: String,
+)
