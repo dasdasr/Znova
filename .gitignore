@@ -1,25 +1,93 @@
-*.iml
-.gradle
-/local.properties
-.idea/
-/.idea/caches
-/.idea/libraries
-/.idea/modules.xml
-/.idea/workspace.xml
-/.idea/navEditor.xml
-/.idea/assetWizardSettings.xml
-.DS_Store
-Thumbs.db
-/build
+
+# ==============================
+# Gradle
+# ==============================
+
+.gradle/
 **/build/
-/captures
-.externalNativeBuild
-.cxx
+!gradle/wrapper/gradle-wrapper.jar
+
+# Gradle local configuration
+gradle.properties.local
+
+# ==============================
+# Android
+# ==============================
+
 local.properties
+.cxx/
+.externalNativeBuild/
+captures/
+*.hprof
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# ==============================
+# IntelliJ IDEA / Android Studio
+# ==============================
+
+.idea/
+*.iml
+*.ipr
+*.iws
+
+# ==============================
+# Kotlin
+# ==============================
+
+.kotlin/
+
+# ==============================
+# Environment and secrets
+# ==============================
 
 .env
 .env.*
 !.env.example
+
 secrets.properties
+secrets.*.properties
+
 *.jks
 *.keystore
+*.p12
+*.pfx
+*.pem
+*.key
+
+# ==============================
+# Signing and credentials
+# ==============================
+
+key.properties
+google-services-local.json
+
+# ==============================
+# macOS / Windows
+# ==============================
+
+.DS_Store
+.AppleDouble
+.LSOverride
+Thumbs.db
+Desktop.ini
+
+# ==============================
+# Logs and temporary files
+# ==============================
+
+*.log
+*.tmp
+*.temp
+*.swp
+*.swo
+*~
+
+# ==============================
+# Build outputs
+# ==============================
+
+/out/
+/artifacts/
