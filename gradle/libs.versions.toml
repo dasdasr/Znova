@@ -18,12 +18,14 @@ spotless = "8.12.0"
 lifecycleViewmodelKtx = "2.11.1"
 hilt = "2.60.1"
 ksp = "2.3.6"
+kotlinxSerialization = "1.9.0"
 
 [libraries]
 maplibre = { module = "org.maplibre.gl:android-sdk", version.ref = "androidSdk" }
 kotlin-gradlePlugin = { module = "org.jetbrains.kotlin:kotlin-gradle-plugin", version.ref = "kotlin" }
 android-gradlePlugin = { module = "com.android.tools.build:gradle", version.ref = "agp" }
 detekt-gradlePlugin = { module = "dev.detekt:detekt-gradle-plugin", version.ref = "detekt" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinxSerialization" }
 
 kotlin-compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }

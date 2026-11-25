@@ -1,12 +1,12 @@
 package com.znova.engine.rules
 
 import com.znova.engine.core.CounterKey
-import com.znova.engine.core.CountryId
 import com.znova.engine.core.EventId
 import com.znova.engine.core.FlagKey
 import com.znova.engine.core.LawKey
 import com.znova.engine.core.LegacyId
 import com.znova.engine.core.OriginId
+import com.znova.engine.core.PlaceId
 import com.znova.engine.core.RoleKey
 import com.znova.engine.core.SkillKey
 import com.znova.engine.core.StatKey
@@ -108,10 +108,14 @@ data class FlagOlderThan(
     }
 }
 
-data class InCountry(
-    val country: CountryId,
-) : Condition {
-    override fun test(state: LifeState) = state.world.countryId == country
+data class InPlace(val place: PlaceId) : Condition {
+    override fun test(state: LifeState) = place in state.world.placePath
+}
+data class PlaceHasTag(val tag: String) : Condition {
+    override fun test(state: LifeState) = tag in state.world.placeTags
+}
+data class PlaceAxisAtLeast(val axis: String, val value: Int) : Condition {
+    override fun test(state: LifeState) = (state.world.placeAxes[axis] ?: 0) >= value
 }
 
 data class LawActive(

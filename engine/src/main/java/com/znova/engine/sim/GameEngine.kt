@@ -9,9 +9,6 @@ import com.znova.engine.core.ActivityId
 import com.znova.engine.core.ChoiceId
 import com.znova.engine.core.EventId
 import com.znova.engine.core.Rng
-import com.znova.engine.core.Skills
-import com.znova.engine.core.Stats
-import com.znova.engine.core.Views
 import com.znova.engine.meta.ConcludeResult
 import com.znova.engine.meta.LaboratoryView
 import com.znova.engine.meta.LifeSetup
@@ -44,77 +41,122 @@ import com.znova.engine.state.mapCharacter
  */
 class GameEngine(
     val content: ContentPack,
-    val config: EngineConfig = EngineConfig(),
+    val config: EngineConfig,
 ) {
     fun startLife(
         setup: LifeSetup,
         meta: MetaProfile = MetaProfile(),
     ): LifeState {
         val rng = Rng(setup.seed)
-        val countries = content.countries.values.filter { it.isAvailable(meta.unlocks) }
-        val country =
-            setup.country?.let { content.countries.getValue(it) }
-                ?: rng.weighted(countries) { it.weight }
-                ?: error("No available countries in ContentPack")
+        val schema = content.schema
 
-        val skills = Skills.ALL.associateWith { 0 }.toMutableMap()
-        repeat(config.startSkillPoints) {
-            val open = Skills.ALL.filter { skills.getValue(it) < 4 }
+        val starts = content.places.values.filter {
+            it.startable && it.isAvailable(meta.unlocks)
+        }
+
+        val start = setup.place?.let {
+            content.places[it]
+                ?: error("Unknown start place: ${it.id}")
+        } ?: rng.weighted(starts) { it.weight }
+        ?: error("No available start places in ContentPack")
+
+        require(start.startable) {
+            "Place ${start.id.id} is not startable"
+        }
+        require(start.isAvailable(meta.unlocks)) {
+            "Place ${start.id.id} is locked"
+        }
+
+        val names = content.namesOf(start.id)
+            ?: error("Place ${start.id.id} has no name pool")
+
+        val skills = schema.skills.keys.associateWith { 0 }.toMutableMap()
+
+        repeat(schema.startSkillPoints) {
+            val open = schema.skills.keys.filter {
+                skills.getValue(it) < schema.startSkillCap
+            }
+            check(open.isNotEmpty()) {
+                "Not enough skill capacity for startSkillPoints"
+            }
+
             val key = open[rng.nextInt(open.size)]
             skills[key] = skills.getValue(key) + 1
         }
-        val views = Views.ALL.associateWith { rng.nextInt(5) - 2 }
-        val years = country.startYears
 
-        var state =
-            LifeState(
-                seed = setup.seed,
-                character =
-                    Character(
-                        name = setup.name ?: country.names.pick(rng),
-                        ageMonths = 0,
-                        money = 0,
-                        stats = Stats.ALL.associateWith { config.startStat },
-                        skills = skills,
-                        views = views,
-                    ),
-                world =
-                    World(
-                        countryId = country.id,
-                        startDate =
-                            setup.startDate ?: WorldDate(
-                                year = years.first + rng.nextInt(years.last - years.first + 1),
-                                month = 1,
-                            ),
-                        laws = country.laws,
-                    ),
-                unlocks = meta.unlocks,
-                focus = setup.focus?.takeIf { content.foci[it]?.isAvailable(meta.unlocks) == true },
-                pastLives = meta.archive.takeLast(config.maxPastLives),
-            )
+        val views = schema.views.keys.associateWith {
+            rng.nextInt(schema.viewSpread * 2 + 1) - schema.viewSpread
+        }
 
-        val chosen =
-            setup.legacies
-                .mapNotNull { content.legacies[it] }
-                .filter { it.isAvailable(meta.unlocks) }
-                .distinct()
-                .take(config.legacySlots)
+        val years = content.startYearsOf(start.id)
+            ?: config.defaultStartYears
+
+        var state = LifeState(
+            packId = content.packId,
+            seed = setup.seed,
+            character = Character(
+                name = setup.name ?: names.pick(rng),
+                ageMonths = 0,
+                money = 0,
+                stats = schema.stats.values.associate {
+                    it.key to it.start
+                },
+                skills = skills,
+                views = views,
+            ),
+            world = content.moveWorld(
+                World(
+                    startDate = setup.startDate ?: WorldDate(
+                        year = years.first + rng.nextInt(years.last - years.first + 1),
+                        month = 1,
+                    ),
+                    placeId = start.id,
+                ),
+                start.id,
+            ),
+            unlocks = meta.unlocks,
+            focus = setup.focus?.takeIf {
+                content.foci[it]?.isAvailable(meta.unlocks) == true
+            },
+            pastLives = meta.archive.takeLast(config.maxPastLives),
+        )
+
+        val chosen = setup.legacies
+            .mapNotNull { content.legacies[it] }
+            .filter { it.isAvailable(meta.unlocks) }
+            .distinct()
+            .take(config.legacySlots)
+
         state = state.copy(legacies = chosen.map { it.id }.toSet())
-        state = applyAll(state, chosen.flatMap { it.onStart } + country.onStart, rng)
 
-        val requestedOrigin = setup.origin?.let { content.origins[it] }?.takeIf { it.isAvailable(meta.unlocks) }
-        val origin =
-            requestedOrigin ?: run {
-                val candidates =
-                    content.origins.values.filter { o ->
-                        o.isAvailable(meta.unlocks) && o.conditions.all { it.test(state) }
-                    }
-                rng.weighted(candidates) { it.weight }
+        val placeEffects = content.pathOf(start.id)
+            .reversed()
+            .flatMap { it.onStart }
+
+        state = applyAll(
+            state,
+            chosen.flatMap { it.onStart } + placeEffects,
+            rng,
+        )
+
+        val requestedOrigin = setup.origin
+            ?.let { content.origins[it] }
+            ?.takeIf { it.isAvailable(meta.unlocks) }
+
+        val origin = requestedOrigin ?: run {
+            val candidates = content.origins.values.filter { origin ->
+                origin.isAvailable(meta.unlocks) &&
+                    origin.conditions.all { it.test(state) }
             }
+
+            rng.weighted(candidates) { it.weight }
+        }
+
         if (origin != null) {
             state = state.copy(origin = origin.id)
             state = applyAll(state, origin.effects, rng)
         }
+
         return state.copy(rngDraws = rng.draws)
     }
 
@@ -356,28 +398,34 @@ class GameEngine(
 
     fun summarize(state: LifeState): LifeSummary {
         val ending = checkNotNull(state.ending) { "Life has not ended" }
-        val title = content.titles.firstOrNull { t -> t.conditions.all { it.test(state) } }?.text ?: config.defaultTitle
-        val byImportance = compareBy<ChronicleEntry> { it.tier.ordinal }.thenBy { it.chapter }
-        val highlights =
-            state.chronicle
-                .sortedWith(byImportance)
-                .take(config.highlightsInSummary)
-                .sortedBy { it.chapter }
+        val title = content.titles
+            .firstOrNull { t -> t.conditions.all { it.test(state) } }
+            ?.text ?: config.defaultTitle
+
+        val byImportance =
+            compareBy<ChronicleEntry> { it.tier.ordinal }
+                .thenBy { it.chapter }
+
+        val highlights = state.chronicle
+            .sortedWith(byImportance)
+            .take(config.highlightsInSummary)
+            .sortedBy { it.chapter }
+
         return LifeSummary(
-            state.character.name,
-            state.world.countryId,
-            title,
-            ending.ageMonths / 12,
-            ending.cause,
-            highlights,
-            state.character.tags.keys,
-            state.seed,
+            name = state.character.name,
+            packId = state.packId,
+            placeId = state.world.placeId,
+            title = title,
+            ageYears = ending.ageMonths / 12,
+            cause = ending.cause,
+            highlights = highlights,
+            tags = state.character.tags.keys,
+            seed = state.seed,
             flags = state.character.flags.keys,
             counters = state.character.counters,
         )
     }
 
-    // Meta-progress persists between lives.
     fun conclude(
         meta: MetaProfile,
         state: LifeState,
@@ -402,12 +450,22 @@ class GameEngine(
 
     fun laboratory(meta: MetaProfile): LaboratoryView =
         LaboratoryView(
-            countries = content.countries.values.filter { it.isAvailable(meta.unlocks) },
-            origins = content.origins.values.filter { it.isAvailable(meta.unlocks) },
-            legacies = content.legacies.values.filter { it.isAvailable(meta.unlocks) },
-            foci = content.foci.values.filter { it.isAvailable(meta.unlocks) },
+            places = content.places.values.filter {
+                it.startable && it.isAvailable(meta.unlocks)
+            },
+            origins = content.origins.values.filter {
+                it.isAvailable(meta.unlocks)
+            },
+            legacies = content.legacies.values.filter {
+                it.isAvailable(meta.unlocks)
+            },
+            foci = content.foci.values.filter {
+                it.isAvailable(meta.unlocks)
+            },
             legacySlots = config.legacySlots,
-            openGoals = content.achievements.values.filter { !it.hidden && it.id !in meta.achievements },
+            openGoals = content.achievements.values.filter {
+                !it.hidden && it.id !in meta.achievements
+            },
             archive = meta.archive,
         )
 
@@ -423,7 +481,10 @@ class GameEngine(
     private fun modifiersFor(state: LifeState): List<GameModifier> =
         state.legacies
             .mapNotNull { content.legacies[it] }
-            .flatMap { it.gameModifiers } + content.countries[state.world.countryId]?.gameModifiers.orEmpty()
+            .flatMap { it.gameModifiers } +
+            content.pathOf(state.world.placeId)
+                .reversed()
+                .flatMap { it.gameModifiers }
 
     private fun applyAll(
         state: LifeState,
@@ -550,7 +611,14 @@ class GameEngine(
     ): LifeState = s.copy(chapterState = s.chapterState?.copy(phase = phase))
 
     private fun vitals(s: LifeState): LifeState =
-        if (s.ending == null && s.character.stat(Stats.BODY) <= 0) s.endLife("body_failure") else s
+        if (
+            s.ending == null &&
+            s.character.stat(content.schema.vitalStat) <= 0
+        ) {
+            s.endLife(content.schema.vitalDeathCause)
+        } else {
+            s
+        }
 
     private fun settle(s: LifeState): LifeState {
         val cs = s.chapterState ?: return s

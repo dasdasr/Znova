@@ -1,7 +1,6 @@
 package com.znova.engine.state
 
 import com.znova.engine.core.CounterKey
-import com.znova.engine.core.CountryId
 import com.znova.engine.core.EventId
 import com.znova.engine.core.FlagKey
 import com.znova.engine.core.FocusId
@@ -9,6 +8,7 @@ import com.znova.engine.core.LawKey
 import com.znova.engine.core.LegacyId
 import com.znova.engine.core.NpcId
 import com.znova.engine.core.OriginId
+import com.znova.engine.core.PlaceId
 import com.znova.engine.core.RoleKey
 import com.znova.engine.core.SkillKey
 import com.znova.engine.core.StatKey
@@ -52,9 +52,12 @@ data class Character(
 }
 
 data class World(
-    val countryId: CountryId,
     val startDate: WorldDate,
-    val laws: Set<LawKey>,
+    val placeId: PlaceId,
+    val placePath: List<PlaceId> = emptyList(),
+    val placeTags: Set<String> = emptySet(),
+    val placeAxes: Map<String, Int> = emptyMap(),
+    val laws: Set<LawKey> = emptySet(),
 )
 
 data class WorldDate(
@@ -125,6 +128,7 @@ data class LifeEnding(
 
 data class LifeState(
     val seed: Long,
+    val packId: String,
     val rngDraws: Long = 0,
     val chapter: Int = 0,
     val character: Character,

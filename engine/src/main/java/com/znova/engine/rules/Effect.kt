@@ -1,13 +1,12 @@
 package com.znova.engine.rules
 
 import com.znova.engine.content.ContentPack
-import com.znova.engine.core.Balance
 import com.znova.engine.core.CounterKey
-import com.znova.engine.core.CountryId
 import com.znova.engine.core.EventId
 import com.znova.engine.core.FlagKey
 import com.znova.engine.core.LawKey
 import com.znova.engine.core.NpcId
+import com.znova.engine.core.PlaceId
 import com.znova.engine.core.Rng
 import com.znova.engine.core.RoleKey
 import com.znova.engine.core.SkillKey
@@ -56,9 +55,15 @@ data class ChangeStat(
         state: LifeState,
         ctx: EffectContext,
     ): LifeState {
-        val d = ctx.gameModifiers.fold(delta) { acc, m -> m.statDelta(state, stat, acc) }
+        val d = ctx.gameModifiers.fold(delta) { acc, m ->
+            m.statDelta(state, stat, acc)
+        }
         return state.mapCharacter {
-            it.copy(stats = it.stats + (stat to (it.stat(stat) + d).coerceIn(Balance.STAT)))
+            it.copy(
+                stats = it.stats + (
+                    stat to ctx.content.schema.clampStat(stat, it.stat(stat) + d)
+                    ),
+            )
         }
     }
 }
@@ -71,7 +76,11 @@ data class ChangeSkill(
         state: LifeState,
         ctx: EffectContext,
     ) = state.mapCharacter {
-        it.copy(skills = it.skills + (skill to (it.skill(skill) + delta).coerceIn(Balance.SKILL)))
+        it.copy(
+            skills = it.skills + (
+                skill to ctx.content.schema.clampSkill(skill, it.skill(skill) + delta)
+                ),
+        )
     }
 }
 
@@ -83,7 +92,11 @@ data class ShiftView(
         state: LifeState,
         ctx: EffectContext,
     ) = state.mapCharacter {
-        it.copy(views = it.views + (view to (it.view(view) + delta).coerceIn(Balance.VIEW)))
+        it.copy(
+            views = it.views + (
+                view to ctx.content.schema.clampView(view, it.view(view) + delta)
+                ),
+        )
     }
 }
 
@@ -99,7 +112,7 @@ data class RaiseTag(
         val level = (c.tagLevel(tag) + by).coerceIn(0, max)
         val tags = LinkedHashMap(c.tags)
         if (level == 0) tags.remove(tag) else tags[tag] = level
-        while (tags.size > Balance.MAX_TAGS) {
+        while (tags.size > ctx.content.schema.maxTags) {
             val weakest = tags.entries.filter { it.key != tag }.minByOrNull { it.value } ?: break
             tags.remove(weakest.key)
         }
@@ -146,15 +159,10 @@ data class SetLaw(
     )
 }
 
-data class MoveCountry(
-    val country: CountryId,
-) : Effect {
-    override fun apply(
-        state: LifeState,
-        ctx: EffectContext,
-    ): LifeState {
-        val def = ctx.content.countries[country] ?: return state
-        return state.copy(world = state.world.copy(countryId = country, laws = def.laws))
+data class MoveTo(val place: PlaceId) : Effect {
+    override fun apply(state: LifeState, ctx: EffectContext): LifeState {
+        if (place !in ctx.content.places) return state
+        return state.copy(world = ctx.content.moveWorld(state.world, place))
     }
 }
 
@@ -168,7 +176,7 @@ data class AddNpc(
         state: LifeState,
         ctx: EffectContext,
     ): LifeState {
-        val pool = ctx.content.countries[state.world.countryId]?.names
+        val pool = ctx.content.namesOf(state.world.placeId)
         val npcName = name ?: pool?.pick(ctx.rng) ?: "Stranger"
         val npc = Npc(NpcId("npc-${state.npcs.size + 1}"), npcName, role, attitude, tags)
         return state.copy(npcs = state.npcs + npc)

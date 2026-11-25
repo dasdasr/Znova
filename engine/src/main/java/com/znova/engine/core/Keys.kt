@@ -36,7 +36,7 @@ value class LawKey(
 )
 
 @JvmInline
-value class CountryId(
+value class PlaceId(
     val id: String,
 )
 
@@ -79,50 +79,6 @@ value class UnlockId(
 value class NpcId(
     val id: String,
 )
-
-object Stats {
-    val BODY = StatKey("body")
-    val SPIRIT = StatKey("spirit")
-    val ALL = listOf(BODY, SPIRIT)
-}
-
-object Skills {
-    val AWARENESS = SkillKey("awareness")
-    val INTELLECT = SkillKey("intellect")
-    val EXPRESSION = SkillKey("expression")
-    val RAPPORT = SkillKey("rapport")
-    val INFLUENCE = SkillKey("influence")
-    val CRAFT = SkillKey("craft")
-    val PHYSICALITY = SkillKey("physicality")
-    val ADAPTABILITY = SkillKey("adaptability")
-    val ALL =
-        listOf(
-            AWARENESS,
-            INTELLECT,
-            EXPRESSION,
-            RAPPORT,
-            INFLUENCE,
-            CRAFT,
-            PHYSICALITY,
-            ADAPTABILITY,
-        )
-}
-
-object Views {
-    val KINSHIP = ViewKey("kinship")
-    val ORDER = ViewKey("order")
-    val AMBITION = ViewKey("ambition")
-    val FAITH = ViewKey("faith")
-    val HARDNESS = ViewKey("hardness")
-    val ALL = listOf(KINSHIP, ORDER, AMBITION, FAITH, HARDNESS)
-}
-
-object Balance {
-    val STAT = 0..100
-    val SKILL = 0..10
-    val VIEW = -10..10
-    const val MAX_TAGS = 5
-}
 
 @JvmInline
 value class CounterKey(

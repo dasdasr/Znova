@@ -1,18 +1,18 @@
 package com.znova.engine.meta
 
 import com.znova.engine.content.AchievementDef
-import com.znova.engine.content.CountryDef
 import com.znova.engine.content.FocusDef
 import com.znova.engine.content.LegacyDef
 import com.znova.engine.content.OriginDef
+import com.znova.engine.content.PlaceDef
 import com.znova.engine.content.UnlockDef
 import com.znova.engine.core.AchievementId
 import com.znova.engine.core.CounterKey
-import com.znova.engine.core.CountryId
 import com.znova.engine.core.FlagKey
 import com.znova.engine.core.FocusId
 import com.znova.engine.core.LegacyId
 import com.znova.engine.core.OriginId
+import com.znova.engine.core.PlaceId
 import com.znova.engine.core.TagKey
 import com.znova.engine.core.UnlockId
 import com.znova.engine.state.ChronicleEntry
@@ -20,7 +20,8 @@ import com.znova.engine.state.WorldDate
 
 data class LifeSummary(
     val name: String,
-    val countryId: CountryId,
+    val packId: String,
+    val placeId: PlaceId,
     val title: String,
     val ageYears: Int,
     val cause: String,
@@ -40,7 +41,7 @@ data class MetaProfile(
 data class LifeSetup(
     val seed: Long,
     val name: String? = null,
-    val country: CountryId? = null,
+    val place: PlaceId? = null,
     val origin: OriginId? = null,
     val startDate: WorldDate? = null,
     val focus: FocusId? = null,
@@ -56,7 +57,7 @@ data class ConcludeResult(
 )
 
 data class LaboratoryView(
-    val countries: List<CountryDef>,
+    val places: List<PlaceDef>,
     val origins: List<OriginDef>,
     val legacies: List<LegacyDef>,
     val foci: List<FocusDef>,

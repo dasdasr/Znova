@@ -1,10 +1,13 @@
 @file:Suppress("ktlint:standard:no-wildcard-imports")
 
-package com.znova.engine
+package com.znova.original
 
+import com.znova.engine.Flags
+import com.znova.engine.Tags
 import com.znova.engine.content.*
 import com.znova.engine.core.*
 import com.znova.engine.rules.*
+import com.znova.engine.state.LifeState
 import com.znova.engine.state.Tier
 
 object Counters {
@@ -152,7 +155,7 @@ object SampleMetaModule : ContentModule {
                     listOf(
                         object : GameModifier {
                             override fun eventWeight(
-                                state: com.znova.engine.state.LifeState,
+                                state: LifeState,
                                 event: EventDef,
                                 weight: Double,
                             ) = if (event.id.id == "illness") weight * 2.0 else weight
@@ -183,13 +186,13 @@ object SampleMetaModule : ContentModule {
                     listOf(
                         object : GameModifier {
                             override fun choiceVisible(
-                                state: com.znova.engine.state.LifeState,
+                                state: LifeState,
                                 choice: ChoiceDef,
                                 visible: Boolean,
                             ) = true
 
                             override fun choiceEnabled(
-                                state: com.znova.engine.state.LifeState,
+                                state: LifeState,
                                 choice: ChoiceDef,
                                 enabled: Boolean,
                             ) = enabled && choice.visibleWhen.all { it.test(state) }
@@ -207,7 +210,7 @@ object SampleMetaModule : ContentModule {
                     listOf(
                         object : GameModifier {
                             override fun statDelta(
-                                state: com.znova.engine.state.LifeState,
+                                state: LifeState,
                                 stat: StatKey,
                                 delta: Int,
                             ) = if (stat == Stats.BODY && delta < 0) delta / 2 else delta

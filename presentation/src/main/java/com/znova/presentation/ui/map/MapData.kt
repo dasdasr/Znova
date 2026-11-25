@@ -2,6 +2,7 @@ package com.znova.ui.map
 
 import android.content.Context
 import android.util.Log
+import com.znova.presentation.ui.map.MapAssets
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
@@ -11,14 +12,6 @@ import org.maplibre.android.geometry.LatLngBounds
 
 private const val TAG = "MapData"
 private const val EMPTY_FC = """{"type":"FeatureCollection","features":[]}"""
-
-/** Approximate bounds of the QGIS raster, used to keep the camera within the mapped region */
-val worldBox = GeoBox(
-    north = 65.0,
-    south = 40.0,
-    east = 32.0,
-    west = 10.0,
-)
 
 enum class CityType {
     CAPITAL, MAJOR_CITY, CITY, OTHER;
@@ -69,28 +62,32 @@ class MapData(
     val bordersJson: String?,
     val countries: Map<String, CountryInfo>,
     val cities: List<CityInfo>,
-    val world: WorldData,
     val worldBox: GeoBox,
 ) {
     val citiesById: Map<String, CityInfo> = cities.associateBy { it.id }
 }
 
 object MapDataLoader {
-    private const val DIR = "map"
-
-    @Volatile
-    private var cached: MapData? = null
-
-    suspend fun load(context: Context): MapData {
-        return cached ?: build(context).also { cached = it }
+    suspend fun load(
+        context: Context,
+        assets: MapAssets,
+    ): MapData = withContext(Dispatchers.IO) {
+        build(context, assets)
     }
 
-    private suspend fun build(context: Context): MapData = withContext(Dispatchers.IO) {
+    private suspend fun build(
+        context: Context,
+        assets: MapAssets,
+    ): MapData = withContext(Dispatchers.IO) {
         fun read(name: String): String? = runCatching {
-            context.assets.open("$DIR/$name.geojson").bufferedReader().use { it.readText() }
+            context.assets
+                .open("${assets.dir}/$name.geojson")
+                .bufferedReader()
+                .use { it.readText() }
         }.getOrNull()
 
-        val countriesJson = read("countries") ?: error("assets/$DIR/countries.geojson is required")
+        val countriesJson = read("countries")
+            ?: error("assets/${assets.dir}/countries.geojson is required")
         val minorJson = read("minor_territories") ?: EMPTY_FC
         val seasJson = read("seas") ?: EMPTY_FC
         val lakesJson = read("lakes") ?: EMPTY_FC
@@ -138,7 +135,7 @@ object MapDataLoader {
 
         // Generate waves on open water, excluding land and lakes.
         val wavesJson = WaveGenerator.generate(
-            box = world ?: worldBox,
+            box = world ?: assets.worldBox,
             land = PolygonIndex.fromFeatures(merged),
             lakes = PolygonIndex.fromFeatures(JSONObject(lakesJson).getJSONArray("features")),
         )
@@ -157,10 +154,17 @@ object MapDataLoader {
                 props.optString("city_code", "")
             )
             if (id.isEmpty() || coords.length() < 2) continue
-            val countryId = props.optString("country_id", "").ifEmpty {
-                nameToId[props.optString("country", "").lowercase()] ?: ""
+            val countryId = props.optString("country_id", "")
+
+            if (countryId.isEmpty()) {
+                Log.w(TAG, "city $id has no country_id, skipped")
+                continue
             }
-            if (countryId !in countries) Log.w(TAG, "city $id has unknown country '${props.optString("country")}'")
+
+            if (countryId !in countries) {
+                Log.w(TAG, "city $id has unknown country_id '$countryId', skipped")
+                continue
+            }
             props.put("country_id", countryId)
             cities += CityInfo(
                 id = id,
@@ -181,8 +185,7 @@ object MapDataLoader {
             bordersJson = bordersJson,
             countries = countries,
             cities = cities,
-            world = WorldData.load(context),
-            worldBox = world ?: worldBox,
+            worldBox = assets.worldBox,
         )
     }
 

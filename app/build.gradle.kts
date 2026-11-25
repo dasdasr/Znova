@@ -13,6 +13,7 @@ dependencies {
     implementation(project(":presentation"))
     implementation(project(":engine"))
     implementation(project(":content"))
+    implementation(project(":world-original"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)

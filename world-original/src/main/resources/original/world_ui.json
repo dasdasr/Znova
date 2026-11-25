@@ -1,0 +1,196 @@
+{
+  "axisMax": 5,
+  "axes": {
+    "industry": {
+      "label": "Industry",
+      "bad": "Little industry",
+      "good": "Industrial strength"
+    },
+    "farming": {
+      "label": "Farming",
+      "bad": "Poor harvests",
+      "good": "Rich harvests"
+    },
+    "trade": {
+      "label": "Trade",
+      "bad": "Isolated markets",
+      "good": "Busy commerce"
+    },
+    "nature": {
+      "label": "Nature",
+      "bad": "Depleted landscape",
+      "good": "Rich wilderness"
+    },
+    "air": {
+      "label": "Air",
+      "bad": "Foul air",
+      "good": "Clean air"
+    },
+    "water": {
+      "label": "Water",
+      "bad": "Unreliable water",
+      "good": "Abundant clean water"
+    },
+    "soil": {
+      "label": "Soil",
+      "bad": "Poisoned or poor soil",
+      "good": "Fertile soil"
+    },
+    "health": {
+      "label": "Health",
+      "bad": "People get sick often",
+      "good": "Healthy people"
+    },
+    "care": {
+      "label": "Medicine",
+      "bad": "Doctors are hard to find",
+      "good": "Good medical care"
+    },
+    "safety": {
+      "label": "Safety",
+      "bad": "Dangerous streets",
+      "good": "Safe streets"
+    },
+    "stability": {
+      "label": "Order",
+      "bad": "Nothing is certain",
+      "good": "Stable order"
+    },
+    "access": {
+      "label": "Roads",
+      "bad": "Cut off from the world",
+      "good": "Well connected"
+    }
+  },
+  "tags": {
+    "clean": {
+      "tone": "GOOD"
+    },
+    "fertile": {
+      "tone": "GOOD"
+    },
+    "medical_hub": {
+      "tone": "GOOD"
+    },
+    "trade_hub": {
+      "tone": "GOOD"
+    },
+    "transport_hub": {
+      "tone": "GOOD"
+    },
+    "resort": {
+      "tone": "GOOD"
+    },
+    "dirty_water": {
+      "tone": "BAD"
+    },
+    "smog": {
+      "tone": "BAD"
+    },
+    "toxic_soil": {
+      "tone": "BAD"
+    },
+    "floods": {
+      "tone": "BAD"
+    },
+    "wildfires": {
+      "tone": "BAD"
+    },
+    "unrest": {
+      "tone": "BAD"
+    },
+    "insurgents": {
+      "tone": "BAD"
+    },
+    "political_violence": {
+      "tone": "BAD"
+    },
+    "border_tension": {
+      "tone": "BAD"
+    },
+    "war_risk": {
+      "tone": "BAD"
+    },
+    "unexploded_ordnance": {
+      "tone": "BAD"
+    },
+    "poor_healthcare": {
+      "tone": "BAD"
+    },
+    "endemic_disease": {
+      "tone": "BAD"
+    },
+    "vector_disease": {
+      "tone": "BAD"
+    },
+    "waterborne_disease": {
+      "tone": "BAD"
+    },
+    "occupational_disease": {
+      "tone": "BAD"
+    },
+    "sanitation_crisis": {
+      "tone": "BAD"
+    },
+    "smuggling": {
+      "tone": "BAD"
+    },
+    "old_war": {
+      "label": "Scars of war"
+    }
+  },
+  "hiddenTags": [
+    "city",
+    "major_city",
+    "capital"
+  ],
+  "kinds": {
+    "country": {
+      "label": "Country",
+      "childrenTitle": "Cities",
+      "tagsFromChildren": true,
+      "subtitleProp": "government",
+      "facts": [
+        {
+          "prop": "capitalCity",
+          "label": "Capital",
+          "format": "PLACE_REF",
+          "refPrefix": "city:"
+        },
+        {
+          "prop": "currency",
+          "label": "Currency"
+        },
+        {
+          "prop": "divisions",
+          "label": "Divisions",
+          "format": "AFTER_COLON"
+        }
+      ]
+    },
+    "city": {
+      "label": "City",
+      "typeProp": "cityType",
+      "types": {
+        "capital": "Capital",
+        "major_city": "Major city",
+        "city": "City"
+      },
+      "facts": [
+        {
+          "prop": "historicalName",
+          "label": "Former name"
+        },
+        {
+          "prop": "originType",
+          "label": "Origin",
+          "format": "HUMANIZE"
+        }
+      ]
+    }
+  },
+  "text": {
+    "commonTraits": "National character",
+    "averageNote": "City average. Your birthplace may differ."
+  }
+}

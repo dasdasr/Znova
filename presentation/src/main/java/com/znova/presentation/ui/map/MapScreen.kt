@@ -31,39 +31,95 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.znova.engine.content.ContentPack
+import com.znova.engine.core.PlaceId
+import com.znova.original.OriginalPack
 import com.znova.presentation.ui.map.InfoSheet
+import com.znova.presentation.ui.map.MapAssets
+import com.znova.presentation.ui.map.OriginalPresentation.mapUi
+import com.znova.presentation.ui.map.OriginalPresentation.theme
+import com.znova.presentation.ui.map.packPresentations
 
 @Composable
-fun MapScreen(modifier: Modifier = Modifier, onBack: () -> Unit) {
+fun MapScreen(
+    modifier: Modifier = Modifier,
+    onBack: () -> Unit,
+) {
     val context = LocalContext.current.applicationContext
+
+    val packId = OriginalPack.id
+    val presentation = packPresentations[packId]
+    val mapAssets = presentation?.map
+
+    val contentPack = remember {
+        OriginalPack.content()
+    }
+
     var data by remember { mutableStateOf<MapData?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
 
-    LaunchedEffect(context) {
-        runCatching { MapDataLoader.load(context) }
+    LaunchedEffect(context, packId, mapAssets) {
+        if (mapAssets == null) {
+            error = "Map presentation not found for pack: $packId"
+            return@LaunchedEffect
+        }
+
+        runCatching {
+            MapDataLoader.load(context, mapAssets)
+        }
             .onSuccess { data = it }
             .onFailure { error = it.stackTraceToString() }
     }
 
+    val loadedData = data
+
     Box(modifier.fillMaxSize()) {
         when {
-            data != null -> MapContent(data!!, onBack)
-            error != null -> Text(error.orEmpty())
-            else -> CircularProgressIndicator(Modifier.align(Alignment.Center))
+            loadedData != null && mapAssets != null ->
+                MapContent(
+                    data = loadedData,
+                    content = contentPack,
+                    mapAssets = mapAssets,
+                    onBack = onBack,
+                )
+
+            error != null ->
+                Text(error.orEmpty())
+
+            else ->
+                CircularProgressIndicator(Modifier.align(Alignment.Center))
         }
     }
 }
 
 @Composable
-private fun MapContent(data: MapData, onBack: () -> Unit) {
+private fun MapContent(
+    data: MapData,
+    content: ContentPack,
+    mapAssets: MapAssets,
+    onBack: () -> Unit,
+) {
     val state = remember { ZnovaMapState() }
     var lastSelection by remember { mutableStateOf<MapSelection?>(null) }
     LaunchedEffect(state.selection) { state.selection?.let { lastSelection = it } }
 
-    Box(Modifier.fillMaxSize().border(2.dp, Ink)) {
-        ZnovaMap(data, state, Modifier.fillMaxSize())
+    Box(
+        Modifier
+            .fillMaxSize()
+            .border(2.dp, Ink)
+    ) {
+        ZnovaMap(
+            data = data,
+            palette = mapAssets.palette,
+            state = state,
+            modifier = Modifier.fillMaxSize(),
+        )
 
-        Column(Modifier.align(Alignment.TopStart).padding(12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        Column(
+            Modifier
+                .align(Alignment.TopStart)
+                .padding(12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
             StampButton("<", onBack)
             StampButton("+", { state.zoomBy(1.0) })
             StampButton("-", { state.zoomBy(-1.0) })
@@ -71,7 +127,9 @@ private fun MapContent(data: MapData, onBack: () -> Unit) {
         StampButton(
             "CITIES", { state.showAllCities = !state.showAllCities },
             active = state.showAllCities,
-            modifier = Modifier.align(Alignment.TopEnd).padding(12.dp),
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(12.dp),
         )
 
         AnimatedVisibility(
@@ -80,13 +138,20 @@ private fun MapContent(data: MapData, onBack: () -> Unit) {
             enter = slideInVertically { it },
             exit = slideOutVertically { it },
         ) {
-            lastSelection?.let {
+            lastSelection?.let { selected ->
                 InfoSheet(
-                    it,
-                    data.world,
-                    { id -> data.citiesById[id]?.let(state::selectCity) },
-                    state::clearSelection,
-                    Modifier.fillMaxWidth().fillMaxHeight(SHEET_FRACTION)
+                    placeId = when (selected) {
+                        is MapSelection.Country -> PlaceId("country:${selected.info.id}")
+                        is MapSelection.City -> PlaceId("city:${selected.info.id}")
+                    },
+                    content = content,
+                    packTheme = theme,
+                    packMapUi = mapUi,
+                    onPickPlace = { id ->
+                        data.citiesById[id.id.removePrefix("city:")]?.let(state::selectCity)
+                    },
+                    onClose = state::clearSelection,
+                    modifier = Modifier.fillMaxSize(),
                 )
             }
         }
@@ -105,6 +170,12 @@ internal fun StampButton(label: String, onClick: () -> Unit, modifier: Modifier 
             .padding(horizontal = 12.dp),
         contentAlignment = Alignment.Center,
     ) {
-        Text(label, color = if (active) Paper else Ink, fontFamily = FontFamily.Monospace, fontWeight = FontWeight.Bold, fontSize = 14.sp)
+        Text(
+            label,
+            color = if (active) Paper else Ink,
+            fontFamily = FontFamily.Monospace,
+            fontWeight = FontWeight.Bold,
+            fontSize = 14.sp
+        )
     }
 }

@@ -10,6 +10,7 @@ android {
 
 dependencies {
     implementation(project(":engine"))
+    implementation(project(":world-original"))
     implementation(project(":content"))
     implementation(project(":data"))
 

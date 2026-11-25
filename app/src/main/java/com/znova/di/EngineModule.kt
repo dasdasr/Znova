@@ -1,8 +1,8 @@
 package com.znova.di
 
-import com.znova.content.BaseContent
-import com.znova.engine.content.contentPack
 import com.znova.engine.sim.GameEngine
+import com.znova.engine.world.PackRegistry
+import com.znova.original.OriginalPack
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -15,14 +15,11 @@ object EngineModule {
 
     @Provides
     @Singleton
-    fun provideGameEngine(): GameEngine {
-        val content = contentPack(BaseContent)
+    fun providePackRegistry(): PackRegistry =
+        PackRegistry(listOf(OriginalPack))
 
-        val errors = content.validate()
-        require(errors.isEmpty()) {
-            "Invalid content:\n${errors.joinToString("\n")}"
-        }
-
-        return GameEngine(content)
-    }
+    @Provides
+    @Singleton
+    fun provideGameEngine(registry: PackRegistry): GameEngine =
+        registry[OriginalPack.id].engine()
 }

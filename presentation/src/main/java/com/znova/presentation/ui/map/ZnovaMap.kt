@@ -47,6 +47,7 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.znova.presentation.ui.map.MapPalette
 import org.json.JSONArray
 import org.json.JSONObject
 import org.maplibre.android.MapLibre
@@ -82,26 +83,6 @@ internal val Red = Color(0xFFB23A30)
 const val SHEET_FRACTION = 0.45f
 private const val LAND_FILL = "land-fill"
 private val CITY_LAYERS = arrayOf("cities-capital", "cities-major", "cities-minor")
-
-object CountryPalette {
-    private val colors = listOf(
-        0xFF7A55EE,
-        0xFFB23A30,
-        0xFF2F7F6F,
-        0xFFC98A1B,
-        0xFF2E6DB4,
-        0xFF8A4F7D,
-        0xFFD05A8B,
-        0xFF668C32,
-        0xFF1596A3,
-        0xFFD16B32,
-        0xFF5966A8,
-        0xFF747474
-    ).map { Color(it) }
-    private val overrides = mapOf<String, Color>(/* "litoria" to Color(0xFF...) */)
-    fun color(id: String?): Color =
-        if (id == null) colors[0] else overrides[id] ?: colors[(id.hashCode() and Int.MAX_VALUE) % colors.size]
-}
 
 sealed interface MapSelection {
     data class Country(val info: CountryInfo) : MapSelection
@@ -150,6 +131,7 @@ class ZnovaMapState {
 @Composable
 fun ZnovaMap(
     data: MapData,
+    palette: MapPalette,
     state: ZnovaMapState,
     modifier: Modifier = Modifier,
     paperTexture: ImageBitmap? = null,
@@ -198,7 +180,9 @@ fun ZnovaMap(
             }
             map.setMaxZoomPreference(10.0)
 
-            map.setStyle(Style.Builder().fromUri("asset://map/style.json")) { loaded ->
+            map.setStyle(
+                Style.Builder().fromUri("asset://packs/original/map/style.json")
+            ) { loaded ->
                 loaded.addImage(MapIcons.CAPITAL, MapIcons.capital())
                 loaded.addImage(MapIcons.MAJOR, MapIcons.major())
                 loaded.addImage(MapIcons.MINOR, MapIcons.minor())
@@ -248,10 +232,18 @@ fun ZnovaMap(
             "country-label",
         ).forEach { s.setFilter(it, selected) }
 
-        val c = CountryPalette.color(countryId).toArgb()
-        s.getLayer("sel-fill")?.setProperties(PropertyFactory.fillColor(c), PropertyFactory.fillOpacity(0.2f))
-        s.getLayer("sel-band")?.setProperties(PropertyFactory.lineColor(c))
-        s.getLayer("sel-line")?.setProperties(PropertyFactory.lineColor(c))
+        val color = palette.color(countryId).toInt()
+
+        s.getLayer("sel-fill")?.setProperties(
+            PropertyFactory.fillColor(color),
+            PropertyFactory.fillOpacity(0.2f),
+        )
+        s.getLayer("sel-band")?.setProperties(
+            PropertyFactory.lineColor(color),
+        )
+        s.getLayer("sel-line")?.setProperties(
+            PropertyFactory.lineColor(color),
+        )
 
         val cityId = (state.selection as? MapSelection.City)?.info?.id ?: ""
         s.setFilter(

@@ -1,21 +1,17 @@
-package com.znova.content
+package com.znova.original
 
 import com.znova.engine.content.ActivityDef
 import com.znova.engine.content.ChoiceDef
 import com.znova.engine.content.ContentBuilder
 import com.znova.engine.content.ContentModule
-import com.znova.engine.content.CountryDef
 import com.znova.engine.content.EventDef
 import com.znova.engine.content.NamePool
 import com.znova.engine.content.OriginDef
 import com.znova.engine.content.TitleDef
 import com.znova.engine.core.ActivityId
 import com.znova.engine.core.ChoiceId
-import com.znova.engine.core.CountryId
 import com.znova.engine.core.EventId
 import com.znova.engine.core.OriginId
-import com.znova.engine.core.Skills
-import com.znova.engine.core.Stats
 import com.znova.engine.core.TagKey
 import com.znova.engine.rules.AddMoney
 import com.znova.engine.rules.AgeBetween
@@ -26,133 +22,17 @@ import com.znova.engine.rules.RaiseTag
 import com.znova.engine.rules.SkillCheck
 import com.znova.engine.state.Tier
 
-/**
- * Test content used during development.
- * Country IDs must match the country_id properties in the map GeoJSON.
- */
+/** Development-only content for testing engine features. */
 object BaseContent : ContentModule {
 
     override fun register(builder: ContentBuilder) {
-        registerCountries(builder)
         registerOrigins(builder)
         registerEvents(builder)
         registerActivities(builder)
         registerTitles(builder)
     }
 
-    private fun registerCountries(builder: ContentBuilder) {
-        val names = NamePool(
-            first = listOf("Alex", "Marek", "Anton", "Leon", "Victor"),
-            last = listOf("Kovalski", "Novak", "Berger", "Miller", "Urban"),
-        )
-
-        val countries = listOf(
-            CountryDef(
-                id = CountryId("litoria"),
-                name = "Litoria",
-                laws = emptySet(),
-                names = names,
-                government = "Constitutional Monarchy",
-                currencyCode = "LIT",
-                currencyName = "Litorian Crown",
-                description = "Industrial and financial center of Central Europe.",
-            ),
-            CountryDef(
-                id = CountryId("yatvegia"),
-                name = "Yatvegia",
-                laws = emptySet(),
-                names = names,
-                government = "Federal Parliamentary Republic",
-                currencyCode = "YAT",
-                currencyName = "Yatvegian Mark",
-                description = "A federation of regions with strong local identities.",
-            ),
-            CountryDef(
-                id = CountryId("polessia"),
-                name = "Polessia",
-                laws = emptySet(),
-                names = names,
-                government = "Presidential Republic",
-                currencyCode = "POL",
-                currencyName = "Polessian Ruble",
-                description = "An industrial and agricultural country of forests and plains.",
-            ),
-            CountryDef(
-                id = CountryId("podlania"),
-                name = "Podlania",
-                laws = emptySet(),
-                names = names,
-                government = "Parliamentary Republic",
-                currencyCode = "POD",
-                currencyName = "Podlanian Zloty",
-                description = "A commercially influential country with a developed banking sector.",
-            ),
-            CountryDef(
-                id = CountryId("narevia"),
-                name = "Narevia",
-                laws = emptySet(),
-                names = names,
-                government = "Semi-Presidential Republic",
-                currencyCode = "NAR",
-                currencyName = "Narevian Dinar",
-                description = "A transport hub with major railways and river ports.",
-            ),
-            CountryDef(
-                id = CountryId("negovka"),
-                name = "Negovka",
-                laws = emptySet(),
-                names = names,
-                government = "Constitutional Principality",
-                currencyCode = "NEG",
-                currencyName = "Negovkan Franc",
-                description = "A small principality known for private banks and old architecture.",
-            ),
-            CountryDef(
-                id = CountryId("lusatia"),
-                name = "Lusatia",
-                laws = emptySet(),
-                names = names,
-                government = "Federal Republic",
-                currencyCode = "LUS",
-                currencyName = "Lusatian Mark",
-                description = "An engineering and manufacturing center with strong regional identities.",
-            ),
-            CountryDef(
-                id = CountryId("sudovica"),
-                name = "Sudovica",
-                laws = emptySet(),
-                names = names,
-                government = "Parliamentary Federation",
-                currencyCode = "SUD",
-                currencyName = "Sudovican Franc",
-                description = "A federation built around regional compromise and local institutions.",
-            ),
-            CountryDef(
-                id = CountryId("ostrozhia"),
-                name = "Ostrozhia",
-                laws = emptySet(),
-                names = names,
-                government = "Semi-Presidential Republic",
-                currencyCode = "OST",
-                currencyName = "Ostrozhian Koruna",
-                description = "A large industrial country undergoing economic transformation.",
-            ),
-            CountryDef(
-                id = CountryId("chernavia"),
-                name = "Chernavia",
-                laws = emptySet(),
-                names = names,
-                government = "Presidential Republic",
-                currencyCode = "CHE",
-                currencyName = "Chernavian Lev",
-                description = "A southern country with agriculture, mining and trading cities.",
-            ),
-        )
-
-        countries.forEach(builder::country)
-    }
-
-    // Temporary origins required by content validation.
+    // Required by content validation until real origins are registered.
     private fun registerOrigins(builder: ContentBuilder) {
 
         builder.origin(
@@ -191,7 +71,7 @@ object BaseContent : ContentModule {
                         id = EventId("test_$key"),
                         tier = tier,
                         text = "[$key] {name}, {age} y.o. in {country}. Something happens.",
-                        cooldownChapters = 0, // Keep test events available in consecutive chapters.
+                        cooldownChapters = 0, // Allow test events to appear in consecutive chapters.
                         choices = listOf(
                             ChoiceDef(
                                 id = ChoiceId("risk"),
@@ -266,7 +146,19 @@ object BaseContent : ContentModule {
     }
 
     private fun registerTitles(builder: ContentBuilder) {
-        builder.title(TitleDef("The Long-Liver", priority = 10, conditions = listOf(AgeBetween(minYears = 60))))
-        builder.title(TitleDef("Gone Too Soon", priority = 5, conditions = listOf(AgeBetween(maxYears = 30))))
+        builder.title(
+            TitleDef(
+                "The Long-Liver",
+                priority = 10,
+                conditions = listOf(AgeBetween(minYears = 60))
+            )
+        )
+        builder.title(
+            TitleDef(
+                "Gone Too Soon",
+                priority = 5,
+                conditions = listOf(AgeBetween(maxYears = 30))
+            )
+        )
     }
 }

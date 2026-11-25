@@ -5,30 +5,27 @@ import com.znova.engine.content.ActivityDef
 import com.znova.engine.content.ChoiceDef
 import com.znova.engine.content.ContentBuilder
 import com.znova.engine.content.ContentModule
-import com.znova.engine.content.CountryDef
 import com.znova.engine.content.EventDef
 import com.znova.engine.content.LegacyDef
 import com.znova.engine.content.NamePool
 import com.znova.engine.content.OriginDef
+import com.znova.engine.content.PlaceDef
 import com.znova.engine.content.ThoughtDef
 import com.znova.engine.content.TitleDef
 import com.znova.engine.content.WeightRule
 import com.znova.engine.core.AchievementId
 import com.znova.engine.core.ActivityId
 import com.znova.engine.core.ChoiceId
-import com.znova.engine.core.CountryId
 import com.znova.engine.core.EventId
 import com.znova.engine.core.FlagKey
 import com.znova.engine.core.LawKey
 import com.znova.engine.core.LegacyId
 import com.znova.engine.core.OriginId
+import com.znova.engine.core.PlaceId
 import com.znova.engine.core.RoleKey
-import com.znova.engine.core.Skills
 import com.znova.engine.core.StatKey
-import com.znova.engine.core.Stats
 import com.znova.engine.core.TagKey
 import com.znova.engine.core.UnlockId
-import com.znova.engine.core.Views
 import com.znova.engine.rules.AddMoney
 import com.znova.engine.rules.AddNpc
 import com.znova.engine.rules.AgeBetween
@@ -44,7 +41,7 @@ import com.znova.engine.rules.HasNpc
 import com.znova.engine.rules.HasTag
 import com.znova.engine.rules.LawActive
 import com.znova.engine.rules.MoneyBetween
-import com.znova.engine.rules.MoveCountry
+import com.znova.engine.rules.MoveTo
 import com.znova.engine.rules.RaiseTag
 import com.znova.engine.rules.Schedule
 import com.znova.engine.rules.SetFlag
@@ -56,6 +53,9 @@ import com.znova.engine.rules.not
 import com.znova.engine.rules.or
 import com.znova.engine.state.LifeState
 import com.znova.engine.state.Tier
+import com.znova.original.Skills
+import com.znova.original.Stats
+import com.znova.original.Views
 
 object Laws {
     val CLOSED_BORDERS = LawKey("closed_borders")
@@ -89,28 +89,31 @@ private fun c(s: String) = ChoiceId(s)
 
 object SampleModule : ContentModule {
     override fun register(builder: ContentBuilder) {
-        builder.country(
-            CountryDef(
-                CountryId("tsentral"),
-                "Central Republic",
+        builder.place(
+            PlaceDef(
+                id = PlaceId("tsentral"),
+                kind = "country",
+                name = "Central Republic",
+                startable = true,
                 laws = setOf(Laws.CLOSED_BORDERS, Laws.CENSORSHIP),
-                names =
-                    NamePool(
-                        listOf("Jan", "Mara", "Zoya", "Tikhon"),
-                        listOf("Volsky", "Krein", "Lis"),
-                    ),
+                names = NamePool(
+                    listOf("Jan", "Mara", "Zoya", "Tikhon"),
+                    listOf("Volsky", "Krein", "Lis"),
+                ),
             ),
         )
-        builder.country(
-            CountryDef(
-                CountryId("pribrezhye"),
-                "Coastal Union",
+
+        builder.place(
+            PlaceDef(
+                id = PlaceId("pribrezhye"),
+                kind = "country",
+                name = "Coastal Union",
+                startable = true,
                 laws = emptySet(),
-                names =
-                    NamePool(
-                        listOf("Ada", "Leo", "Nina"),
-                        listOf("Pry", "Grom"),
-                    ),
+                names = NamePool(
+                    listOf("Ada", "Leo", "Nina"),
+                    listOf("Pry", "Grom"),
+                ),
             ),
         )
 
@@ -222,7 +225,7 @@ object SampleModule : ContentModule {
                 check = SkillCheck(Skills.ADAPTABILITY, 8),
                 onSuccess =
                     listOf(
-                        MoveCountry(CountryId("pribrezhye")),
+                        MoveTo(PlaceId("pribrezhye")),
                         ClearFlag(Flags.THOUGHT_LEAVE),
                     ),
                 onFailure = listOf(ChangeStat(Stats.BODY, -10)),

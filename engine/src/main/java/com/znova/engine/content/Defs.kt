@@ -3,12 +3,12 @@ package com.znova.engine.content
 import com.znova.engine.core.AchievementId
 import com.znova.engine.core.ActivityId
 import com.znova.engine.core.ChoiceId
-import com.znova.engine.core.CountryId
 import com.znova.engine.core.EventId
 import com.znova.engine.core.FocusId
 import com.znova.engine.core.LawKey
 import com.znova.engine.core.LegacyId
 import com.znova.engine.core.OriginId
+import com.znova.engine.core.PlaceId
 import com.znova.engine.core.Rng
 import com.znova.engine.core.SkillKey
 import com.znova.engine.core.TrackerId
@@ -92,22 +92,22 @@ data class NamePool(
     fun pick(rng: Rng): String = rng.pick(first) + " " + rng.pick(last)
 }
 
-data class CountryDef(
-    val id: CountryId,
+data class PlaceDef(
+    val id: PlaceId,
+    val kind: String,
     val name: String,
-    val laws: Set<LawKey>,
-    val names: NamePool,
-    val startYears: IntRange = 1985..1989,
+    val parent: PlaceId? = null,
+    val startable: Boolean = false,           // Whether this place can be selected as a starting location.
+    val laws: Set<LawKey>? = null,
+    val names: NamePool? = null,
+    val startYears: IntRange? = null,
+    val tags: Set<String> = emptySet(),
+    val axes: Map<String, Int> = emptyMap(),
+    val props: Map<String, String> = emptyMap(),
     val weight: Double = 1.0,
     val onStart: List<Effect> = emptyList(),
     val gameModifiers: List<GameModifier> = emptyList(),
     override val requiresUnlock: UnlockId? = null,
-
-    // Additional country metadata used by the world map.
-    val government: String = "Unknown",
-    val currencyCode: String = "TST",
-    val currencyName: String = "Test Currency",
-    val description: String = "",
 ) : Unlockable
 
 data class OriginDef(

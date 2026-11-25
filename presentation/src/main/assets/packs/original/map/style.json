@@ -1,6 +1,6 @@
 {
   "version": 8,
-  "glyphs": "asset://map/fonts/{fontstack}/{range}.pbf",
+  "glyphs": "asset://packs/original/map/fonts/{fontstack}/{range}.pbf",
   "name": "znova-parchment",
   "sources": {
     "land": {
