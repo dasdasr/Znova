@@ -1,5 +1,8 @@
 plugins {
     id("znova.android.application")
+
+    alias(libs.plugins.hilt.android)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -7,9 +10,9 @@ android {
 }
 
 dependencies {
+    implementation(project(":presentation"))
     implementation(project(":engine"))
     implementation(project(":content"))
-    implementation(project(":data"))
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
@@ -29,4 +32,7 @@ dependencies {
 
     debugImplementation(libs.androidx.compose.ui.test.manifest)
     debugImplementation(libs.androidx.compose.ui.tooling)
+
+    implementation(libs.hilt.android)
+    ksp(libs.hilt.compiler)
 }

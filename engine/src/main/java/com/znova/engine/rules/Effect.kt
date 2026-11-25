@@ -25,7 +25,7 @@ import com.znova.engine.state.mapCharacter
 class EffectContext(
     val rng: Rng,
     val content: ContentPack,
-    val modifiers: List<Modifier>,
+    val gameModifiers: List<GameModifier>,
 )
 
 interface Effect {
@@ -56,7 +56,7 @@ data class ChangeStat(
         state: LifeState,
         ctx: EffectContext,
     ): LifeState {
-        val d = ctx.modifiers.fold(delta) { acc, m -> m.statDelta(state, stat, acc) }
+        val d = ctx.gameModifiers.fold(delta) { acc, m -> m.statDelta(state, stat, acc) }
         return state.mapCharacter {
             it.copy(stats = it.stats + (stat to (it.stat(stat) + d).coerceIn(Balance.STAT)))
         }

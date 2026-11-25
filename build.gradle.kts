@@ -1,6 +1,10 @@
 plugins {
     base
     alias(libs.plugins.spotless)
+    alias(libs.plugins.android.library) apply false
+
+    alias(libs.plugins.hilt.android) apply false
+    alias(libs.plugins.ksp) apply false
 }
 
 spotless {

@@ -15,7 +15,7 @@ import com.znova.engine.core.TrackerId
 import com.znova.engine.core.UnlockId
 import com.znova.engine.rules.Condition
 import com.znova.engine.rules.Effect
-import com.znova.engine.rules.Modifier
+import com.znova.engine.rules.GameModifier
 import com.znova.engine.rules.SkillCheck
 import com.znova.engine.state.Tier
 
@@ -100,8 +100,14 @@ data class CountryDef(
     val startYears: IntRange = 1985..1989,
     val weight: Double = 1.0,
     val onStart: List<Effect> = emptyList(),
-    val modifiers: List<Modifier> = emptyList(),
+    val gameModifiers: List<GameModifier> = emptyList(),
     override val requiresUnlock: UnlockId? = null,
+
+    // Additional country metadata used by the world map.
+    val government: String = "Unknown",
+    val currencyCode: String = "TST",
+    val currencyName: String = "Test Currency",
+    val description: String = "",
 ) : Unlockable
 
 data class OriginDef(
@@ -119,7 +125,7 @@ data class LegacyDef(
     val name: String,
     val description: String,
     val onStart: List<Effect> = emptyList(),
-    val modifiers: List<Modifier> = emptyList(),
+    val gameModifiers: List<GameModifier> = emptyList(),
     override val requiresUnlock: UnlockId? = null,
 ) : Unlockable
 

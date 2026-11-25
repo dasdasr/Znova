@@ -1,0 +1,667 @@
+{
+  "version": 8,
+  "glyphs": "asset://map/fonts/{fontstack}/{range}.pbf",
+  "name": "znova-parchment",
+  "sources": {
+    "land": {
+      "type": "geojson",
+      "tolerance": 1.0,
+      "data": {
+        "type": "FeatureCollection",
+        "features": []
+      }
+    },
+    "lakes": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": []
+      }
+    },
+    "rivers": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": []
+      }
+    },
+    "borders": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": []
+      }
+    },
+    "cities": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": []
+      }
+    },
+    "seas": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": []
+      }
+    },
+    "waves": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": []
+      }
+    },
+    "graticule15": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": []
+      }
+    },
+    "graticule5": {
+      "type": "geojson",
+      "data": {
+        "type": "FeatureCollection",
+        "features": []
+      }
+    }
+  },
+  "layers": [
+    {
+      "id": "ocean",
+      "type": "background",
+      "paint": {
+        "background-color": "#adc1ca"
+      }
+    },
+    {
+      "id": "halo-outer",
+      "type": "line",
+      "source": "land",
+      "layout": {
+        "line-join": "round",
+        "line-cap": "round"
+      },
+      "paint": {
+        "line-color": "#b9ccd4",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          1,
+          20,
+          8,
+          40
+        ]
+      }
+    },
+    {
+      "id": "halo-gap",
+      "type": "line",
+      "source": "land",
+      "layout": {
+        "line-join": "round",
+        "line-cap": "round"
+      },
+      "paint": {
+        "line-color": "#adc1ca",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          1,
+          14,
+          8,
+          28
+        ]
+      }
+    },
+    {
+      "id": "halo-inner",
+      "type": "line",
+      "source": "land",
+      "layout": {
+        "line-join": "round",
+        "line-cap": "round"
+      },
+      "paint": {
+        "line-color": "#c8d9df",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          1,
+          8,
+          8,
+          16
+        ]
+      }
+    },
+    {
+      "id": "waves",
+      "type": "symbol",
+      "source": "waves",
+      "maxzoom": 10,
+      "layout": {
+        "icon-image": [
+          "concat",
+          "wave-",
+          [
+            "to-string",
+            [
+              "get",
+              "v"
+            ]
+          ]
+        ],
+        "icon-size": [
+          "get",
+          "s"
+        ],
+        "symbol-sort-key": [
+          "get",
+          "r"
+        ],
+        "icon-allow-overlap": false,
+        "icon-padding": 2
+      },
+      "paint": {
+        "icon-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          2,
+          0.85,
+          10,
+          0.85
+        ]
+      }
+    },
+    {
+      "id": "coast-line",
+      "type": "line",
+      "source": "land",
+      "layout": {
+        "line-join": "round",
+        "line-cap": "round"
+      },
+      "paint": {
+        "line-color": "#2b2118",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          1,
+          5,
+          8,
+          10
+        ]
+      }
+    },
+    {
+      "id": "land-fill",
+      "type": "fill",
+      "source": "land",
+      "paint": {
+        "fill-color": [
+          "case",
+          [
+            "==",
+            [
+              "get",
+              "minor"
+            ],
+            true
+          ],
+          "#d9d0b4",
+          "#ece1c3"
+        ],
+        "fill-antialias": false
+      }
+    },
+    {
+      "id": "lakes-halo",
+      "type": "line",
+      "source": "lakes",
+      "layout": {
+        "line-join": "round"
+      },
+      "paint": {
+        "line-color": "#c3d5dc",
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          3,
+          4,
+          9,
+          10
+        ]
+      }
+    },
+    {
+      "id": "lakes-fill",
+      "type": "fill",
+      "source": "lakes",
+      "paint": {
+        "fill-color": "#a9c3cf"
+      }
+    },
+    {
+      "id": "lakes-line",
+      "type": "line",
+      "source": "lakes",
+      "paint": {
+        "line-color": "#8fa9b7",
+        "line-width": 1
+      }
+    },
+    {
+      "id": "rivers",
+      "type": "line",
+      "source": "rivers",
+      "layout": {
+        "line-join": "round",
+        "line-cap": "round"
+      },
+      "paint": {
+        "line-color": "#93aebb",
+        "line-opacity": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          3,
+          0,
+          5,
+          0.35,
+          8,
+          0.9
+        ],
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          3,
+          0.3,
+          8,
+          2.2
+        ]
+      }
+    },
+    {
+      "id": "graticule-coarse",
+      "type": "line",
+      "source": "graticule15",
+      "maxzoom": 4,
+      "layout": {
+        "line-cap": "round"
+      },
+      "paint": {
+        "line-color": "#2b2118",
+        "line-opacity": 0.3,
+        "line-width": 1.2,
+        "line-dasharray": [
+          0.2,
+          2.5
+        ]
+      }
+    },
+    {
+      "id": "graticule-fine",
+      "type": "line",
+      "source": "graticule5",
+      "minzoom": 4,
+      "layout": {
+        "line-cap": "round"
+      },
+      "paint": {
+        "line-color": "#2b2118",
+        "line-opacity": 0.3,
+        "line-width": 1.2,
+        "line-dasharray": [
+          0.2,
+          2.5
+        ]
+      }
+    },
+    {
+      "id": "borders-far",
+      "type": "line",
+      "source": "borders",
+      "maxzoom": 5,
+      "layout": {
+        "line-join": "round"
+      },
+      "paint": {
+        "line-color": "#2b2118",
+        "line-opacity": 0.8,
+        "line-width": 1,
+        "line-dasharray": [
+          3,
+          2
+        ]
+      }
+    },
+    {
+      "id": "borders-near",
+      "type": "line",
+      "source": "borders",
+      "minzoom": 5,
+      "layout": {
+        "line-join": "round",
+        "line-cap": "round"
+      },
+      "paint": {
+        "line-color": "#2b2118",
+        "line-opacity": 0.9,
+        "line-width": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          5,
+          1.4,
+          9,
+          2.2
+        ],
+        "line-dasharray": [
+          5,
+          2,
+          0.6,
+          2
+        ]
+      }
+    },
+    {
+      "id": "borders-fallback",
+      "type": "line",
+      "source": "land",
+      "filter": [
+        "has",
+        "country_id"
+      ],
+      "layout": {
+        "visibility": "none"
+      },
+      "paint": {
+        "line-color": "#2b2118",
+        "line-opacity": 0.5,
+        "line-width": 1
+      }
+    },
+    {
+      "id": "sel-fill",
+      "type": "fill",
+      "source": "land",
+      "filter": [
+        "==",
+        [
+          "get",
+          "country_id"
+        ],
+        ""
+      ],
+      "paint": {
+        "fill-color": "#d9a98c",
+        "fill-opacity": 0.2,
+        "fill-antialias": false
+      }
+    },
+    {
+      "id": "sel-band",
+      "type": "line",
+      "source": "land",
+      "filter": [
+        "==",
+        [
+          "get",
+          "country_id"
+        ],
+        ""
+      ],
+      "layout": {
+        "line-join": "round",
+        "line-cap": "round"
+      },
+      "paint": {
+        "line-color": "#7a55ee",
+        "line-opacity": 0.22,
+        "line-width": 7
+      }
+    },
+    {
+      "id": "sel-inner",
+      "type": "line",
+      "source": "land",
+      "filter": [
+        "==",
+        [
+          "get",
+          "country_id"
+        ],
+        ""
+      ],
+      "layout": {
+        "line-join": "round",
+        "line-cap": "round"
+      },
+      "paint": {
+        "line-color": "#F4E9CD",
+        "line-width": 1
+      }
+    },
+    {
+      "id": "sel-line",
+      "type": "line",
+      "source": "land",
+      "filter": [
+        "==",
+        [
+          "get",
+          "country_id"
+        ],
+        ""
+      ],
+      "layout": {
+        "line-join": "round",
+        "line-cap": "round"
+      },
+      "paint": {
+        "line-color": "#7a55ee",
+        "line-width": 2.5
+      }
+    },
+    {
+      "id": "city-selected",
+      "type": "circle",
+      "source": "cities",
+      "filter": [
+        "==",
+        [
+          "get",
+          "city_id"
+        ],
+        ""
+      ],
+      "paint": {
+        "circle-radius": 13,
+        "circle-color": "rgba(0,0,0,0)",
+        "circle-stroke-color": "#2B2118",
+        "circle-stroke-width": 2.5,
+        "circle-stroke-opacity": 0.9
+      }
+    },
+    {
+      "id": "cities-minor",
+      "type": "symbol",
+      "source": "cities",
+      "minzoom": 5,
+      "layout": {
+        "visibility": "none",
+        "icon-image": "city-minor",
+        "icon-allow-overlap": false,
+        "icon-size": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          5,
+          0.4,
+          8,
+          0.55,
+          10,
+          0.7
+        ],
+        "text-field": [
+          "get",
+          "name"
+        ],
+        "text-font": [
+          "Noto Sans Bold"
+        ],
+        "text-size": 12,
+        "text-anchor": "top",
+        "text-offset": [
+          0,
+          0.9
+        ],
+        "text-optional": true
+      },
+      "paint": {
+        "text-color": "#2b2118",
+        "text-halo-color": "#f4e9cd",
+        "text-halo-width": 1.5
+      }
+    },
+    {
+      "id": "cities-major",
+      "type": "symbol",
+      "source": "cities",
+      "minzoom": 3.5,
+      "layout": {
+        "visibility": "none",
+        "icon-image": "city-major",
+        "icon-allow-overlap": true,
+        "icon-size": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          3.5,
+          0.5,
+          6,
+          0.75,
+          10,
+          1.0
+        ],
+        "text-field": [
+          "get",
+          "name"
+        ],
+        "text-font": [
+          "Noto Sans Bold"
+        ],
+        "text-size": 12,
+        "text-anchor": "top",
+        "text-offset": [
+          0,
+          0.9
+        ],
+        "text-optional": true
+      },
+      "paint": {
+        "text-color": "#2b2118",
+        "text-halo-color": "#f4e9cd",
+        "text-halo-width": 1.5
+      }
+    },
+    {
+      "id": "cities-capital",
+      "type": "symbol",
+      "source": "cities",
+      "minzoom": 2,
+      "layout": {
+        "visibility": "none",
+        "icon-image": "city-capital",
+        "icon-allow-overlap": true,
+        "icon-size": [
+          "interpolate",
+          [
+            "linear"
+          ],
+          [
+            "zoom"
+          ],
+          2,
+          0.65,
+          6,
+          0.95,
+          10,
+          1.2
+        ],
+        "text-field": [
+          "get",
+          "name"
+        ],
+        "text-font": [
+          "Noto Sans Bold"
+        ],
+        "text-size": 12,
+        "text-anchor": "top",
+        "text-offset": [
+          0,
+          0.9
+        ],
+        "text-optional": true
+      },
+      "paint": {
+        "text-color": "#2b2118",
+        "text-halo-color": "#f4e9cd",
+        "text-halo-width": 1.5
+      }
+    }
+  ]
+}

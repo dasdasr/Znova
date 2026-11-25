@@ -21,7 +21,7 @@ import com.znova.engine.rules.CheckMath
 import com.znova.engine.rules.CheckResult
 import com.znova.engine.rules.Effect
 import com.znova.engine.rules.EffectContext
-import com.znova.engine.rules.Modifier
+import com.znova.engine.rules.GameModifier
 import com.znova.engine.rules.SkillCheck
 import com.znova.engine.rules.TextRenderer
 import com.znova.engine.state.Card
@@ -420,10 +420,10 @@ class GameEngine(
         return block(rng).copy(rngDraws = rng.draws)
     }
 
-    private fun modifiersFor(state: LifeState): List<Modifier> =
+    private fun modifiersFor(state: LifeState): List<GameModifier> =
         state.legacies
             .mapNotNull { content.legacies[it] }
-            .flatMap { it.modifiers } + content.countries[state.world.countryId]?.modifiers.orEmpty()
+            .flatMap { it.gameModifiers } + content.countries[state.world.countryId]?.gameModifiers.orEmpty()
 
     private fun applyAll(
         state: LifeState,
@@ -460,7 +460,7 @@ class GameEngine(
     private fun weightOf(
         s: LifeState,
         e: EventDef,
-        mods: List<Modifier>,
+        mods: List<GameModifier>,
     ): Double {
         var w = e.weight
         for (r in e.weightRules) if (r.condition.test(s)) w *= r.multiplier
@@ -508,7 +508,7 @@ class GameEngine(
     private fun preview(
         s: LifeState,
         check: SkillCheck?,
-        mods: List<Modifier>,
+        mods: List<GameModifier>,
     ): CheckPreview? {
         check ?: return null
         val modifier =

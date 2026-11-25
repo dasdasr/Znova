@@ -5,7 +5,7 @@ import com.znova.engine.content.EventDef
 import com.znova.engine.core.StatKey
 import com.znova.engine.state.LifeState
 
-interface Modifier {
+interface GameModifier {
     fun eventWeight(
         state: LifeState,
         event: EventDef,
