@@ -96,10 +96,11 @@ object SampleModule : ContentModule {
                 name = "Central Republic",
                 startable = true,
                 laws = setOf(Laws.CLOSED_BORDERS, Laws.CENSORSHIP),
-                names = NamePool(
-                    listOf("Jan", "Mara", "Zoya", "Tikhon"),
-                    listOf("Volsky", "Krein", "Lis"),
-                ),
+                names =
+                    NamePool(
+                        listOf("Jan", "Mara", "Zoya", "Tikhon"),
+                        listOf("Volsky", "Krein", "Lis"),
+                    ),
             ),
         )
 
@@ -110,10 +111,11 @@ object SampleModule : ContentModule {
                 name = "Coastal Union",
                 startable = true,
                 laws = emptySet(),
-                names = NamePool(
-                    listOf("Ada", "Leo", "Nina"),
-                    listOf("Pry", "Grom"),
-                ),
+                names =
+                    NamePool(
+                        listOf("Ada", "Leo", "Nina"),
+                        listOf("Pry", "Grom"),
+                    ),
             ),
         )
 

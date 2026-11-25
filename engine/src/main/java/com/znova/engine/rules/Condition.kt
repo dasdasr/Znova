@@ -108,13 +108,22 @@ data class FlagOlderThan(
     }
 }
 
-data class InPlace(val place: PlaceId) : Condition {
+data class InPlace(
+    val place: PlaceId,
+) : Condition {
     override fun test(state: LifeState) = place in state.world.placePath
 }
-data class PlaceHasTag(val tag: String) : Condition {
+
+data class PlaceHasTag(
+    val tag: String,
+) : Condition {
     override fun test(state: LifeState) = tag in state.world.placeTags
 }
-data class PlaceAxisAtLeast(val axis: String, val value: Int) : Condition {
+
+data class PlaceAxisAtLeast(
+    val axis: String,
+    val value: Int,
+) : Condition {
     override fun test(state: LifeState) = (state.world.placeAxes[axis] ?: 0) >= value
 }
 

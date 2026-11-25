@@ -44,8 +44,13 @@ fun interface MortalityModel {
     ): Double
 }
 
-class GompertzMortality(private val vital: StatKey) : MortalityModel {
-    override fun deathChance(state: LifeState, months: Int): Double {
+class GompertzMortality(
+    private val vital: StatKey,
+) : MortalityModel {
+    override fun deathChance(
+        state: LifeState,
+        months: Int,
+    ): Double {
         val years = state.character.ageMonths / 12.0
         val body = state.character.stat(vital)
         val bodyFactor = (2.0 - body / 50.0).coerceIn(0.4, 3.0)

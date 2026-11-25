@@ -23,7 +23,10 @@ import com.znova.presentation.ui.ChapterPanel
 import kotlin.collections.orEmpty
 
 @Composable
-internal fun LifeScreen(state: UiState, vm: GameViewModel) {
+internal fun LifeScreen(
+    state: UiState,
+    vm: GameViewModel,
+) {
     val life = state.life ?: return
     val chapter = state.chapter ?: return
     val cards = life.chapterState?.cards.orEmpty()

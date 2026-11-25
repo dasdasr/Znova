@@ -9,12 +9,13 @@ object OriginalPack : WorldPack {
     override val displayName = "Znova Original"
     override val version = 1
     override val schema = OriginalSchema
-    override val config = EngineConfig(
-        pacing = OriginalPacing,
-        mortality = GompertzMortality(schema.vitalStat),
-        defaultStartYears = 1985..1989,
-        legacySlots = 3,
-        defaultTitle = "The Untitled",
-    )
+    override val config =
+        EngineConfig(
+            pacing = OriginalPacing,
+            mortality = GompertzMortality(schema.vitalStat),
+            defaultStartYears = 1985..1989,
+            legacySlots = 3,
+            defaultTitle = "The Untitled",
+        )
     override val modules = listOf(OriginalWorld, BaseContent)
 }

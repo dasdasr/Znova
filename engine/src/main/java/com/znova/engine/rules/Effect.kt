@@ -55,13 +55,15 @@ data class ChangeStat(
         state: LifeState,
         ctx: EffectContext,
     ): LifeState {
-        val d = ctx.gameModifiers.fold(delta) { acc, m ->
-            m.statDelta(state, stat, acc)
-        }
+        val d =
+            ctx.gameModifiers.fold(delta) { acc, m ->
+                m.statDelta(state, stat, acc)
+            }
         return state.mapCharacter {
             it.copy(
-                stats = it.stats + (
-                    stat to ctx.content.schema.clampStat(stat, it.stat(stat) + d)
+                stats =
+                    it.stats + (
+                        stat to ctx.content.schema.clampStat(stat, it.stat(stat) + d)
                     ),
             )
         }
@@ -77,8 +79,9 @@ data class ChangeSkill(
         ctx: EffectContext,
     ) = state.mapCharacter {
         it.copy(
-            skills = it.skills + (
-                skill to ctx.content.schema.clampSkill(skill, it.skill(skill) + delta)
+            skills =
+                it.skills + (
+                    skill to ctx.content.schema.clampSkill(skill, it.skill(skill) + delta)
                 ),
         )
     }
@@ -93,8 +96,9 @@ data class ShiftView(
         ctx: EffectContext,
     ) = state.mapCharacter {
         it.copy(
-            views = it.views + (
-                view to ctx.content.schema.clampView(view, it.view(view) + delta)
+            views =
+                it.views + (
+                    view to ctx.content.schema.clampView(view, it.view(view) + delta)
                 ),
         )
     }
@@ -159,8 +163,13 @@ data class SetLaw(
     )
 }
 
-data class MoveTo(val place: PlaceId) : Effect {
-    override fun apply(state: LifeState, ctx: EffectContext): LifeState {
+data class MoveTo(
+    val place: PlaceId,
+) : Effect {
+    override fun apply(
+        state: LifeState,
+        ctx: EffectContext,
+    ): LifeState {
         if (place !in ctx.content.places) return state
         return state.copy(world = ctx.content.moveWorld(state.world, place))
     }

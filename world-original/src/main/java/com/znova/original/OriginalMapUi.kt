@@ -21,9 +21,10 @@ object OriginalMapUi {
     private const val RESOURCE = "/original/world_ui.json"
 
     val value: PackMapUi by lazy {
-        val stream = requireNotNull(OriginalMapUi::class.java.getResourceAsStream(RESOURCE)) {
-            "Missing UI resource: $RESOURCE"
-        }
+        val stream =
+            requireNotNull(OriginalMapUi::class.java.getResourceAsStream(RESOURCE)) {
+                "Missing UI resource: $RESOURCE"
+            }
         val text = stream.bufferedReader().use { it.readText() }
         parseMapUi(Json.parseToJsonElement(text).jsonObject)
     }
@@ -32,20 +33,26 @@ object OriginalMapUi {
         root.allowOnly("axes", "axisMax", "tags", "hiddenTags", "kinds", "text")
 
         return PackMapUi(
-            axes = root.objects("axes").mapValues { (_, o) ->
-                o.allowOnly("label", "bad", "good")
-                AxisUi(o.string("label"), o.string("bad"), o.string("good"))
-            },
+            axes =
+                root.objects("axes").mapValues { (_, o) ->
+                    o.allowOnly("label", "bad", "good")
+                    AxisUi(o.string("label"), o.string("bad"), o.string("good"))
+                },
             axisMax = root["axisMax"]?.jsonPrimitive?.int ?: PackMapUi().axisMax,
-            tags = root.objects("tags").mapValues { (_, o) ->
-                o.allowOnly("label", "tone")
-                TagUi(
-                    label = o.optional("label"),
-                    tone = o.optional("tone")?.let(Tone::valueOf) ?: Tone.NEUTRAL,
-                )
-            },
-            hiddenTags = root["hiddenTags"]?.jsonArray
-                ?.map { it.jsonPrimitive.content }?.toSet().orEmpty(),
+            tags =
+                root.objects("tags").mapValues { (_, o) ->
+                    o.allowOnly("label", "tone")
+                    TagUi(
+                        label = o.optional("label"),
+                        tone = o.optional("tone")?.let(Tone::valueOf) ?: Tone.NEUTRAL,
+                    )
+                },
+            hiddenTags =
+                root["hiddenTags"]
+                    ?.jsonArray
+                    ?.map { it.jsonPrimitive.content }
+                    ?.toSet()
+                    .orEmpty(),
             kinds = root.objects("kinds").mapValues { (_, o) -> parseKind(o) },
             text = root["text"]?.let { parseText(it.jsonObject) } ?: SheetText(),
         )
@@ -53,8 +60,14 @@ object OriginalMapUi {
 
     private fun parseKind(o: JsonObject): KindUi {
         o.allowOnly(
-            "label", "childrenTitle", "tagsFromChildren", "typeProp",
-            "types", "codeProp", "subtitleProp", "facts",
+            "label",
+            "childrenTitle",
+            "tagsFromChildren",
+            "typeProp",
+            "types",
+            "codeProp",
+            "subtitleProp",
+            "facts",
         )
         val defaults = KindUi(label = o.string("label"))
 
@@ -63,8 +76,11 @@ object OriginalMapUi {
             tagsFromChildren = o["tagsFromChildren"]?.jsonPrimitive?.boolean ?: false,
             typeProp = o.optional("typeProp"),
             // Key order defines the display order.
-            types = o["types"]?.jsonObject
-                ?.mapValues { (_, v) -> v.jsonPrimitive.content }.orEmpty(),
+            types =
+                o["types"]
+                    ?.jsonObject
+                    ?.mapValues { (_, v) -> v.jsonPrimitive.content }
+                    .orEmpty(),
             codeProp = o.optional("codeProp") ?: defaults.codeProp,
             subtitleProp = o.optional("subtitleProp"),
             facts = o["facts"]?.jsonArray?.map { parseFact(it.jsonObject) }.orEmpty(),
@@ -83,12 +99,27 @@ object OriginalMapUi {
 
     private fun parseText(o: JsonObject): SheetText {
         o.allowOnly(
-            "overview", "conditions", "best", "worst", "traits", "commonTraits",
-            "localTraits", "facts", "positive", "negative", "neutral",
-            "averageNote", "empty", "notFound",
+            "overview",
+            "conditions",
+            "best",
+            "worst",
+            "traits",
+            "commonTraits",
+            "localTraits",
+            "facts",
+            "positive",
+            "negative",
+            "neutral",
+            "averageNote",
+            "empty",
+            "notFound",
         )
         val d = SheetText()
-        fun get(key: String, default: String) = o.optional(key) ?: default
+
+        fun get(
+            key: String,
+            default: String,
+        ) = o.optional(key) ?: default
 
         return SheetText(
             overview = get("overview", d.overview),
@@ -117,9 +148,7 @@ object OriginalMapUi {
     private fun JsonObject.objects(key: String): Map<String, JsonObject> =
         this[key]?.jsonObject?.mapValues { (_, v) -> v.jsonObject }.orEmpty()
 
-    private fun JsonObject.optional(key: String): String? =
-        this[key]?.jsonPrimitive?.content
+    private fun JsonObject.optional(key: String): String? = this[key]?.jsonPrimitive?.content
 
-    private fun JsonObject.string(key: String): String =
-        optional(key) ?: error("Missing '$key' in $RESOURCE")
+    private fun JsonObject.string(key: String): String = optional(key) ?: error("Missing '$key' in $RESOURCE")
 }

@@ -21,7 +21,10 @@ import androidx.compose.ui.unit.dp
 import com.znova.app.GameViewModel
 
 @Composable
-internal fun LaboratoryScreen(state: GameViewModel.UiState, vm: GameViewModel) {
+internal fun LaboratoryScreen(
+    state: GameViewModel.UiState,
+    vm: GameViewModel,
+) {
     Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text("Laboratory", style = MaterialTheme.typography.headlineMedium)
         Text("Archive: ${state.meta.archive.size} lives, ${state.meta.unlocks.size} unlocks")

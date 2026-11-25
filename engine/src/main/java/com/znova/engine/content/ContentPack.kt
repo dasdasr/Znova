@@ -2,11 +2,11 @@ package com.znova.engine.content
 
 import com.znova.engine.core.AchievementId
 import com.znova.engine.core.ActivityId
-import com.znova.engine.core.PlaceId
 import com.znova.engine.core.EventId
 import com.znova.engine.core.FocusId
 import com.znova.engine.core.LegacyId
 import com.znova.engine.core.OriginId
+import com.znova.engine.core.PlaceId
 import com.znova.engine.core.TrackerId
 import com.znova.engine.core.UnlockId
 import com.znova.engine.rules.Effect
@@ -35,16 +35,16 @@ class ContentPack internal constructor(
             place.parent?.let(places::get)
         }.take(32).toList()
 
-    fun lawsOf(id: PlaceId) =
-        pathOf(id).firstNotNullOfOrNull { it.laws }
+    fun lawsOf(id: PlaceId) = pathOf(id).firstNotNullOfOrNull { it.laws }
 
-    fun namesOf(id: PlaceId) =
-        pathOf(id).firstNotNullOfOrNull { it.names }
+    fun namesOf(id: PlaceId) = pathOf(id).firstNotNullOfOrNull { it.names }
 
-    fun startYearsOf(id: PlaceId) =
-        pathOf(id).firstNotNullOfOrNull { it.startYears }
+    fun startYearsOf(id: PlaceId) = pathOf(id).firstNotNullOfOrNull { it.startYears }
 
-    fun moveWorld(world: World, id: PlaceId): World {
+    fun moveWorld(
+        world: World,
+        id: PlaceId,
+    ): World {
         val path = pathOf(id)
 
         require(path.isNotEmpty()) {
@@ -55,9 +55,10 @@ class ContentPack internal constructor(
             placeId = id,
             placePath = path.map { it.id },
             placeTags = path.flatMap { it.tags }.toSet(),
-            placeAxes = path.reversed().fold(emptyMap()) { acc, place ->
-                acc + place.axes
-            },
+            placeAxes =
+                path.reversed().fold(emptyMap()) { acc, place ->
+                    acc + place.axes
+                },
             laws = lawsOf(id) ?: emptySet(),
         )
     }
@@ -100,7 +101,11 @@ class ContentPack internal constructor(
                 errors += "event ${e.id.id}: no unconditional choice (player may get stuck)"
             }
 
-            if (e.choices.map { it.id }.toSet().size != e.choices.size) {
+            if (e.choices
+                    .map { it.id }
+                    .toSet()
+                    .size != e.choices.size
+            ) {
                 errors += "event ${e.id.id}: duplicate choice IDs"
             }
         }
@@ -202,79 +207,94 @@ class ContentBuilder(
         }
     }
 
-    fun event(e: EventDef) = apply {
-        events.addUnique(e.id, e, "event")
-    }
+    fun event(e: EventDef) =
+        apply {
+            events.addUnique(e.id, e, "event")
+        }
 
-    fun activity(a: ActivityDef) = apply {
-        activities.addUnique(a.id, a, "activity")
-    }
+    fun activity(a: ActivityDef) =
+        apply {
+            activities.addUnique(a.id, a, "activity")
+        }
 
-    fun thought(t: ThoughtDef) = apply {
-        thoughts.addUnique(t.id, t, "thought")
-    }
+    fun thought(t: ThoughtDef) =
+        apply {
+            thoughts.addUnique(t.id, t, "thought")
+        }
 
-    fun place(p: PlaceDef) = apply {
-        places.addUnique(p.id, p, "place")
-    }
+    fun place(p: PlaceDef) =
+        apply {
+            places.addUnique(p.id, p, "place")
+        }
 
-    fun origin(o: OriginDef) = apply {
-        origins.addUnique(o.id, o, "origin")
-    }
+    fun origin(o: OriginDef) =
+        apply {
+            origins.addUnique(o.id, o, "origin")
+        }
 
-    fun legacy(l: LegacyDef) = apply {
-        legacies.addUnique(l.id, l, "legacy")
-    }
+    fun legacy(l: LegacyDef) =
+        apply {
+            legacies.addUnique(l.id, l, "legacy")
+        }
 
-    fun achievement(a: AchievementDef) = apply {
-        achievements.addUnique(a.id, a, "achievement")
-    }
+    fun achievement(a: AchievementDef) =
+        apply {
+            achievements.addUnique(a.id, a, "achievement")
+        }
 
-    fun unlock(u: UnlockDef) = apply {
-        unlocks.addUnique(u.id, u, "unlock")
-    }
+    fun unlock(u: UnlockDef) =
+        apply {
+            unlocks.addUnique(u.id, u, "unlock")
+        }
 
-    fun tracker(t: TrackerDef) = apply {
-        trackers.addUnique(t.id, t, "tracker")
-    }
+    fun tracker(t: TrackerDef) =
+        apply {
+            trackers.addUnique(t.id, t, "tracker")
+        }
 
-    fun focus(f: FocusDef) = apply {
-        foci.addUnique(f.id, f, "focus")
-    }
+    fun focus(f: FocusDef) =
+        apply {
+            foci.addUnique(f.id, f, "focus")
+        }
 
-    fun observerNote(n: ObserverNoteDef) = apply {
-        observerNotes.addUnique(n.id, n, "observer note")
-    }
+    fun observerNote(n: ObserverNoteDef) =
+        apply {
+            observerNotes.addUnique(n.id, n, "observer note")
+        }
 
-    fun title(t: TitleDef) = apply {
-        titles += t
-    }
+    fun title(t: TitleDef) =
+        apply {
+            titles += t
+        }
 
-    fun upkeep(e: Effect) = apply {
-        upkeep += e
-    }
+    fun upkeep(e: Effect) =
+        apply {
+            upkeep += e
+        }
 
-    fun install(module: ContentModule) = apply {
-        module.register(this)
-    }
+    fun install(module: ContentModule) =
+        apply {
+            module.register(this)
+        }
 
-    fun build() = ContentPack(
-        packId = packId,
-        schema = schema,
-        events = events,
-        activities = activities,
-        thoughts = thoughts,
-        places = places,
-        origins = origins,
-        legacies = legacies,
-        achievements = achievements,
-        unlocks = unlocks,
-        trackers = trackers,
-        foci = foci,
-        observerNotes = observerNotes,
-        titles = titles.sortedByDescending { it.priority },
-        upkeep = upkeep.toList(),
-    )
+    fun build() =
+        ContentPack(
+            packId = packId,
+            schema = schema,
+            events = events,
+            activities = activities,
+            thoughts = thoughts,
+            places = places,
+            origins = origins,
+            legacies = legacies,
+            achievements = achievements,
+            unlocks = unlocks,
+            trackers = trackers,
+            foci = foci,
+            observerNotes = observerNotes,
+            titles = titles.sortedByDescending { it.priority },
+            upkeep = upkeep.toList(),
+        )
 }
 
 fun contentPack(
@@ -285,5 +305,4 @@ fun contentPack(
     ContentBuilder(packId, schema)
         .also { builder ->
             modules.forEach { builder.install(it) }
-        }
-        .build()
+        }.build()

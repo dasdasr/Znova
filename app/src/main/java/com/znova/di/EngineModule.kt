@@ -12,14 +12,11 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object EngineModule {
+    @Provides
+    @Singleton
+    fun providePackRegistry(): PackRegistry = PackRegistry(listOf(OriginalPack))
 
     @Provides
     @Singleton
-    fun providePackRegistry(): PackRegistry =
-        PackRegistry(listOf(OriginalPack))
-
-    @Provides
-    @Singleton
-    fun provideGameEngine(registry: PackRegistry): GameEngine =
-        registry[OriginalPack.id].engine()
+    fun provideGameEngine(registry: PackRegistry): GameEngine = registry[OriginalPack.id].engine()
 }

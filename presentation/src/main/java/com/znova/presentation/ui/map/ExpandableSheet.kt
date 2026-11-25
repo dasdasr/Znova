@@ -4,8 +4,15 @@ import androidx.compose.animation.core.animate
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.draggable
 import androidx.compose.foundation.gestures.rememberDraggableState
-import androidx.compose.foundation.layout.*
-import androidx.compose.runtime.*
+import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -52,33 +59,37 @@ internal fun ExpandableSheet(
             animateTo(if (expand) EXPANDED else SHEET_FRACTION)
         }
 
-        val connection = remember(heightPx) {
-            object : NestedScrollConnection {
-                override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset =
-                    if (source == NestedScrollSource.UserInput && available.y < 0) {
-                        Offset(0f, drag(available.y))
-                    } else {
-                        Offset.Zero
-                    }
+        val connection =
+            remember(heightPx) {
+                object : NestedScrollConnection {
+                    override fun onPreScroll(
+                        available: Offset,
+                        source: NestedScrollSource,
+                    ): Offset =
+                        if (source == NestedScrollSource.UserInput && available.y < 0) {
+                            Offset(0f, drag(available.y))
+                        } else {
+                            Offset.Zero
+                        }
 
-                override fun onPostScroll(
-                    consumed: Offset,
-                    available: Offset,
-                    source: NestedScrollSource,
-                ): Offset =
-                    if (source == NestedScrollSource.UserInput && available.y > 0) {
-                        Offset(0f, drag(available.y))
-                    } else {
-                        Offset.Zero
-                    }
+                    override fun onPostScroll(
+                        consumed: Offset,
+                        available: Offset,
+                        source: NestedScrollSource,
+                    ): Offset =
+                        if (source == NestedScrollSource.UserInput && available.y > 0) {
+                            Offset(0f, drag(available.y))
+                        } else {
+                            Offset.Zero
+                        }
 
-                override suspend fun onPreFling(available: Velocity): Velocity {
-                    if (fraction <= SHEET_FRACTION || fraction >= EXPANDED) return Velocity.Zero
-                    settle(available.y)
-                    return available
+                    override suspend fun onPreFling(available: Velocity): Velocity {
+                        if (fraction <= SHEET_FRACTION || fraction >= EXPANDED) return Velocity.Zero
+                        settle(available.y)
+                        return available
+                    }
                 }
             }
-        }
 
         val dragState = rememberDraggableState { drag(it) }
 

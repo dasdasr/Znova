@@ -97,7 +97,7 @@ data class PlaceDef(
     val kind: String,
     val name: String,
     val parent: PlaceId? = null,
-    val startable: Boolean = false,           // Whether this place can be selected as a starting location.
+    val startable: Boolean = false, // Whether this place can be selected as a starting location.
     val laws: Set<LawKey>? = null,
     val names: NamePool? = null,
     val startYears: IntRange? = null,

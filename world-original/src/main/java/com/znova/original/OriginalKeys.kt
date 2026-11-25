@@ -10,8 +10,8 @@ import com.znova.engine.world.WorldSchema
 import kotlin.collections.map
 
 object Stats {
-    val BODY = StatKey("body");
-    val SPIRIT = StatKey("spirit");
+    val BODY = StatKey("body")
+    val SPIRIT = StatKey("spirit")
     val ALL = listOf(BODY, SPIRIT)
 }
 
@@ -46,20 +46,23 @@ object Views {
     val ALL = listOf(KINSHIP, ORDER, AMBITION, FAITH, HARDNESS)
 }
 
-val OriginalSchema = WorldSchema(
-    stats = Stats.ALL.map {
-        StatDef(it, it.id.replaceFirstChar(Char::uppercase), 0..100, start = 60)
-    },
-    skills = Skills.ALL.map {
-        SkillDef(it, it.id)
-    },
-    views = Views.ALL.map {
-        ViewDef(it, it.id)
-    },
-    vitalStat = Stats.BODY,
-    vitalDeathCause = "body_failure",
-
-    startSkillPoints = 6,
-    startSkillCap = 4,
-    maxTags = 5,
-)
+val OriginalSchema =
+    WorldSchema(
+        stats =
+            Stats.ALL.map {
+                StatDef(it, it.id.replaceFirstChar(Char::uppercase), 0..100, start = 60)
+            },
+        skills =
+            Skills.ALL.map {
+                SkillDef(it, it.id)
+            },
+        views =
+            Views.ALL.map {
+                ViewDef(it, it.id)
+            },
+        vitalStat = Stats.BODY,
+        vitalDeathCause = "body_failure",
+        startSkillPoints = 6,
+        startSkillCap = 4,
+        maxTags = 5,
+    )

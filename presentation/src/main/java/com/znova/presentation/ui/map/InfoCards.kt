@@ -4,23 +4,38 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.znova.engine.content.AxisUi
@@ -97,11 +112,16 @@ internal fun InfoSheet(
     }
 }
 
-private fun buildDossier(place: PlaceDef, content: ContentPack, ui: PackMapUi): Dossier {
+private fun buildDossier(
+    place: PlaceDef,
+    content: ContentPack,
+    ui: PackMapUi,
+): Dossier {
     val kind = kindUi(place, ui)
-    val children = content.places.values
-        .filter { it.parent == place.id }
-        .sortedWith(compareBy<PlaceDef> { typeRank(it, ui) }.thenBy { it.name })
+    val children =
+        content.places.values
+            .filter { it.parent == place.id }
+            .sortedWith(compareBy<PlaceDef> { typeRank(it, ui) }.thenBy { it.name })
 
     val rolledUp = kind.tagsFromChildren && children.isNotEmpty()
     var traits = (place.tags - ui.hiddenTags).sorted()
@@ -110,39 +130,46 @@ private fun buildDossier(place: PlaceDef, content: ContentPack, ui: PackMapUi): 
     if (rolledUp) {
         // A trait is shared when at least half the children have it, with a minimum of two.
         val counts = children.flatMap { it.tags - ui.hiddenTags }.groupingBy { it }.eachCount()
-        traits = counts
-            .filter { (_, n) -> children.size == 1 || (n >= 2 && n * 2 >= children.size) }
-            .entries
-            .sortedWith(compareByDescending<Map.Entry<String, Int>> { it.value }.thenBy { it.key })
-            .take(6)
-            .map { it.key }
+        traits =
+            counts
+                .filter { (_, n) -> children.size == 1 || (n >= 2 && n * 2 >= children.size) }
+                .entries
+                .sortedWith(compareByDescending<Map.Entry<String, Int>> { it.value }.thenBy { it.key })
+                .take(6)
+                .map { it.key }
         localTraits = (counts.keys - traits.toSet()).sorted()
     }
 
     // Use local axes when available; otherwise derive averages from children.
     val averaged = place.axes.isEmpty() && children.any { it.axes.isNotEmpty() }
-    val axes = if (!averaged) place.axes else {
-        children.flatMap { it.axes.keys }.distinct().associateWith { axis ->
-            children.mapNotNull { it.axes[axis] }.average().roundToInt()
+    val axes =
+        if (!averaged) {
+            place.axes
+        } else {
+            children.flatMap { it.axes.keys }.distinct().associateWith { axis ->
+                children.mapNotNull { it.axes[axis] }.average().roundToInt()
+            }
         }
-    }
 
-    val facts = kind.facts.mapNotNull { fact ->
-        val raw = place.props[fact.prop]?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
-        val value = when (fact.format) {
-            FactFormat.TEXT -> raw
-            FactFormat.HUMANIZE -> humanize(raw)
-            FactFormat.AFTER_COLON -> raw.substringAfter(": ")
-            FactFormat.PLACE_REF -> content.places[PlaceId(fact.refPrefix + raw)]?.name
+    val facts =
+        kind.facts.mapNotNull { fact ->
+            val raw = place.props[fact.prop]?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
+            val value =
+                when (fact.format) {
+                    FactFormat.TEXT -> raw
+                    FactFormat.HUMANIZE -> humanize(raw)
+                    FactFormat.AFTER_COLON -> raw.substringAfter(": ")
+                    FactFormat.PLACE_REF -> content.places[PlaceId(fact.refPrefix + raw)]?.name
+                }
+            value?.let { fact.label to it }
         }
-        value?.let { fact.label to it }
-    }
 
     return Dossier(
         kicker = typeLabel(place, ui),
         title = place.name,
-        subtitle = kind.subtitleProp?.let { place.props[it] }
-            ?: place.parent?.let { content.places[it]?.name },
+        subtitle =
+            kind.subtitleProp?.let { place.props[it] }
+                ?: place.parent?.let { content.places[it]?.name },
         facts = facts,
         axes = axes,
         averaged = averaged,
@@ -154,28 +181,40 @@ private fun buildDossier(place: PlaceDef, content: ContentPack, ui: PackMapUi): 
     )
 }
 
-private fun kindUi(place: PlaceDef, ui: PackMapUi) =
-    ui.kinds[place.kind] ?: KindUi(label = humanize(place.kind))
+private fun kindUi(
+    place: PlaceDef,
+    ui: PackMapUi,
+) = ui.kinds[place.kind] ?: KindUi(label = humanize(place.kind))
 
-private fun typeRank(place: PlaceDef, ui: PackMapUi): Int {
+private fun typeRank(
+    place: PlaceDef,
+    ui: PackMapUi,
+): Int {
     val kind = kindUi(place, ui)
     val type = kind.typeProp?.let { place.props[it] }
     val rank = kind.types.keys.indexOf(type)
     return if (rank < 0) kind.types.size else rank
 }
 
-private fun typeLabel(place: PlaceDef, ui: PackMapUi): String {
+private fun typeLabel(
+    place: PlaceDef,
+    ui: PackMapUi,
+): String {
     val kind = kindUi(place, ui)
     return kind.typeProp?.let { place.props[it] }?.let { kind.types[it] } ?: kind.label
 }
 
-private fun axisUi(key: String, ui: PackMapUi) =
-    ui.axes[key] ?: AxisUi(humanize(key), "Poor ${key.replace('_', ' ')}", "Strong ${key.replace('_', ' ')}")
+private fun axisUi(
+    key: String,
+    ui: PackMapUi,
+) = ui.axes[key] ?: AxisUi(humanize(key), "Poor ${key.replace('_', ' ')}", "Strong ${key.replace('_', ' ')}")
 
-private fun tagLabel(tag: String, ui: PackMapUi) = ui.tags[tag]?.label ?: humanize(tag)
+private fun tagLabel(
+    tag: String,
+    ui: PackMapUi,
+) = ui.tags[tag]?.label ?: humanize(tag)
 
-private fun humanize(value: String) =
-    value.replace('_', ' ').replaceFirstChar { it.uppercase() }
+private fun humanize(value: String) = value.replace('_', ' ').replaceFirstChar { it.uppercase() }
 
 @Composable
 private fun ColumnScope.DossierView(
@@ -191,13 +230,14 @@ private fun ColumnScope.DossierView(
 
     val text = mapUi.text
     DossierTabs(
-        titles = tabs.map {
-            when (it) {
-                Tab.OVERVIEW -> text.overview
-                Tab.CONDITIONS -> text.conditions
-                Tab.CHILDREN -> d.childrenTitle
-            }
-        },
+        titles =
+            tabs.map {
+                when (it) {
+                    Tab.OVERVIEW -> text.overview
+                    Tab.CONDITIONS -> text.conditions
+                    Tab.CHILDREN -> d.childrenTitle
+                }
+            },
         selected = tabs.indexOf(tab),
         onSelect = { tab = tabs[it] },
     )
@@ -214,16 +254,21 @@ private fun ColumnScope.DossierView(
             when (tab) {
                 Tab.OVERVIEW -> Overview(d)
                 Tab.CONDITIONS -> Conditions(d)
-                Tab.CHILDREN -> d.children.forEach { child ->
-                    PlaceRow(child) { onPickPlace(child.id) }
-                }
+                Tab.CHILDREN ->
+                    d.children.forEach { child ->
+                        PlaceRow(child) { onPickPlace(child.id) }
+                    }
             }
         }
     }
 }
 
 @Composable
-private fun Header(d: Dossier, handle: Modifier, onClose: () -> Unit) {
+private fun Header(
+    d: Dossier,
+    handle: Modifier,
+    onClose: () -> Unit,
+) {
     val skin = theme
     Row(
         handle.fillMaxWidth().padding(start = 16.dp, end = 4.dp, bottom = 6.dp),
@@ -328,7 +373,10 @@ private fun Conditions(d: Dossier) {
 }
 
 @Composable
-private fun AxisRow(key: String, value: Int) {
+private fun AxisRow(
+    key: String,
+    value: Int,
+) {
     val skin = theme
     val info = axisUi(key, mapUi)
     val max = mapUi.axisMax
@@ -360,10 +408,16 @@ private fun AxisRow(key: String, value: Int) {
 }
 
 @Composable
-private fun PlaceRow(place: PlaceDef, onClick: () -> Unit) {
+private fun PlaceRow(
+    place: PlaceDef,
+    onClick: () -> Unit,
+) {
     val skin = theme
     val ui = mapUi
-    val strongest = place.axes.entries.filter { it.value != 0 }.maxByOrNull { abs(it.value) }
+    val strongest =
+        place.axes.entries
+            .filter { it.value != 0 }
+            .maxByOrNull { abs(it.value) }
 
     DossierCard(Modifier.clickable(onClick = onClick)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -402,11 +456,12 @@ private fun Chips(tags: List<String>) {
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         tags.forEach { tag ->
-            val color = when (ui.tags[tag]?.tone) {
-                Tone.GOOD -> skin.good
-                Tone.BAD -> skin.bad
-                else -> skin.ink
-            }
+            val color =
+                when (ui.tags[tag]?.tone) {
+                    Tone.GOOD -> skin.good
+                    Tone.BAD -> skin.bad
+                    else -> skin.ink
+                }
             DossierChip(tagLabel(tag, ui), color)
         }
     }

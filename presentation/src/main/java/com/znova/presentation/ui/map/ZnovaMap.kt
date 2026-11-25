@@ -85,17 +85,23 @@ private const val LAND_FILL = "land-fill"
 private val CITY_LAYERS = arrayOf("cities-capital", "cities-major", "cities-minor")
 
 sealed interface MapSelection {
-    data class Country(val info: CountryInfo) : MapSelection
-    data class City(val info: CityInfo) : MapSelection
+    data class Country(
+        val info: CountryInfo,
+    ) : MapSelection
+
+    data class City(
+        val info: CityInfo,
+    ) : MapSelection
 }
 
 // A city selection also highlights its country.
 val MapSelection?.countryId: String?
-    get() = when (this) {
-        is MapSelection.Country -> info.id
-        is MapSelection.City -> info.countryId
-        null -> null
-    }
+    get() =
+        when (this) {
+            is MapSelection.Country -> info.id
+            is MapSelection.City -> info.countryId
+            null -> null
+        }
 
 @Stable
 class ZnovaMapState {
@@ -142,22 +148,24 @@ fun ZnovaMap(
     var mapSize by remember { mutableStateOf(IntSize.Zero) }
     var style by remember { mutableStateOf<Style?>(null) }
 
-    val mapView = remember {
-        MapLibre.getInstance(context)
-        MapView(context, MapLibreMapOptions.createFromAttributes(context).textureMode(true))
-    }
+    val mapView =
+        remember {
+            MapLibre.getInstance(context)
+            MapView(context, MapLibreMapOptions.createFromAttributes(context).textureMode(true))
+        }
 
     DisposableEffect(lifecycle, mapView) {
-        val observer = LifecycleEventObserver { _, event ->
-            when (event) {
-                Lifecycle.Event.ON_CREATE -> mapView.onCreate(null)
-                Lifecycle.Event.ON_START -> mapView.onStart()
-                Lifecycle.Event.ON_RESUME -> mapView.onResume()
-                Lifecycle.Event.ON_PAUSE -> mapView.onPause()
-                Lifecycle.Event.ON_STOP -> mapView.onStop()
-                else -> Unit
+        val observer =
+            LifecycleEventObserver { _, event ->
+                when (event) {
+                    Lifecycle.Event.ON_CREATE -> mapView.onCreate(null)
+                    Lifecycle.Event.ON_START -> mapView.onStart()
+                    Lifecycle.Event.ON_RESUME -> mapView.onResume()
+                    Lifecycle.Event.ON_PAUSE -> mapView.onPause()
+                    Lifecycle.Event.ON_STOP -> mapView.onStop()
+                    else -> Unit
+                }
             }
-        }
         lifecycle.addObserver(observer)
         onDispose {
             lifecycle.removeObserver(observer)
@@ -181,7 +189,7 @@ fun ZnovaMap(
             map.setMaxZoomPreference(10.0)
 
             map.setStyle(
-                Style.Builder().fromUri("asset://packs/original/map/style.json")
+                Style.Builder().fromUri("asset://packs/original/map/style.json"),
             ) { loaded ->
                 loaded.addImage(MapIcons.CAPITAL, MapIcons.capital())
                 loaded.addImage(MapIcons.MAJOR, MapIcons.major())
@@ -195,16 +203,21 @@ fun ZnovaMap(
             map.addOnMapClickListener { latLng ->
                 val p = map.projection.toScreenLocation(latLng)
                 val r = 22f * density
-                val city = map
-                    .queryRenderedFeatures(RectF(p.x - r, p.y - r, p.x + r, p.y + r), *CITY_LAYERS)
-                    .firstOrNull()?.getStringProperty("city_id")
-                    ?.let { data.citiesById[it] }
+                val city =
+                    map
+                        .queryRenderedFeatures(RectF(p.x - r, p.y - r, p.x + r, p.y + r), *CITY_LAYERS)
+                        .firstOrNull()
+                        ?.getStringProperty("city_id")
+                        ?.let { data.citiesById[it] }
                 if (city != null) {
                     state.selectCity(city)
                 } else {
-                    val country = map.queryRenderedFeatures(p, LAND_FILL)
-                        .firstOrNull()?.getStringProperty("country_id")
-                        ?.let { data.countries[it] }
+                    val country =
+                        map
+                            .queryRenderedFeatures(p, LAND_FILL)
+                            .firstOrNull()
+                            ?.getStringProperty("country_id")
+                            ?.let { data.countries[it] }
                     if (country != null) state.selectCountry(country) else state.clearSelection()
                 }
                 true
@@ -250,23 +263,26 @@ fun ZnovaMap(
             "city-selected",
             Expression.eq(
                 Expression.get("city_id"),
-                Expression.literal(cityId)
-            )
-        )
-
-        val scope: Expression? = when {
-            state.showAllCities -> Expression.literal(true)
-            countryId != null -> Expression.eq(Expression.get("country_id"), Expression.literal(countryId))
-            else -> null
-        }
-        val typeFilters = mapOf(
-            "cities-capital" to Expression.eq(Expression.get("type"), Expression.literal("capital")),
-            "cities-major" to Expression.eq(Expression.get("type"), Expression.literal("major_city")),
-            "cities-minor" to Expression.all(
-                Expression.neq(Expression.get("type"), Expression.literal("capital")),
-                Expression.neq(Expression.get("type"), Expression.literal("major_city")),
+                Expression.literal(cityId),
             ),
         )
+
+        val scope: Expression? =
+            when {
+                state.showAllCities -> Expression.literal(true)
+                countryId != null -> Expression.eq(Expression.get("country_id"), Expression.literal(countryId))
+                else -> null
+            }
+        val typeFilters =
+            mapOf(
+                "cities-capital" to Expression.eq(Expression.get("type"), Expression.literal("capital")),
+                "cities-major" to Expression.eq(Expression.get("type"), Expression.literal("major_city")),
+                "cities-minor" to
+                    Expression.all(
+                        Expression.neq(Expression.get("type"), Expression.literal("capital")),
+                        Expression.neq(Expression.get("type"), Expression.literal("major_city")),
+                    ),
+            )
         for ((layerId, typeFilter) in typeFilters) {
             if (scope == null) {
                 s.getLayer(layerId)?.setProperties(PropertyFactory.visibility(Property.NONE))
@@ -293,7 +309,8 @@ fun ZnovaMap(
     Box(
         modifier
             .background(Paper)
-            .onSizeChanged { mapSize = it }) {
+            .onSizeChanged { mapSize = it },
+    ) {
         AndroidView(factory = { mapView }, modifier = Modifier.fillMaxSize())
         Box(
             Modifier
@@ -308,31 +325,51 @@ fun ZnovaMap(
     }
 }
 
-private fun coverZoom(box: GeoBox, size: IntSize, density: Float): Double {
+private fun coverZoom(
+    box: GeoBox,
+    size: IntSize,
+    density: Float,
+): Double {
     val w = (box.east - box.west) / 360.0 * 512.0
     val h = (mercatorY(box.south) - mercatorY(box.north)) * 512.0
     return maxOf(log2(size.width / density / w), log2(size.height / density / h))
 }
 
 private fun fitCountry(
-    map: MapLibreMap, country: CountryInfo, world: GeoBox,
-    size: IntSize, density: Float, sheetPx: Int,
+    map: MapLibreMap,
+    country: CountryInfo,
+    world: GeoBox,
+    size: IntSize,
+    density: Float,
+    sheetPx: Int,
 ) {
     val pad = (28 * density).roundToInt()
-    val cam = map.getCameraForLatLngBounds(
-        country.box.toLatLngBounds(), intArrayOf(pad, pad, pad, pad + sheetPx),
-    ) ?: return
+    val cam =
+        map.getCameraForLatLngBounds(
+            country.box.toLatLngBounds(),
+            intArrayOf(pad, pad, pad, pad + sheetPx),
+        ) ?: return
     val zoom = cam.zoom.coerceAtMost(9.0)
     val center = clampCenter(cam.target ?: return, zoom, size, density, world)
     map.animateCamera(
-        CameraUpdateFactory.newCameraPosition(CameraPosition.Builder().target(center).zoom(zoom).build()),
+        CameraUpdateFactory.newCameraPosition(
+            CameraPosition
+                .Builder()
+                .target(center)
+                .zoom(zoom)
+                .build(),
+        ),
         700,
     )
 }
 
 private fun flyToCity(
-    map: MapLibreMap, city: CityInfo, world: GeoBox,
-    size: IntSize, density: Float, sheetPx: Int,
+    map: MapLibreMap,
+    city: CityInfo,
+    world: GeoBox,
+    size: IntSize,
+    density: Float,
+    sheetPx: Int,
 ) {
     val zoom = maxOf(map.cameraPosition.zoom, 6.5)
     // Offset the city above the bottom sheet in a single camera animation.
@@ -340,13 +377,25 @@ private fun flyToCity(
     val y = mercatorY(city.position.latitude) + (sheetPx / density / 2.0) / worldPx
     val center = clampCenter(LatLng(latitudeOf(y), city.position.longitude), zoom, size, density, world)
     map.animateCamera(
-        CameraUpdateFactory.newCameraPosition(CameraPosition.Builder().target(center).zoom(zoom).build()),
+        CameraUpdateFactory.newCameraPosition(
+            CameraPosition
+                .Builder()
+                .target(center)
+                .zoom(zoom)
+                .build(),
+        ),
         600,
     )
 }
 
 /** Keep the viewport inside world bounds while fitting the selected country. */
-private fun clampCenter(c: LatLng, zoom: Double, size: IntSize, density: Float, box: GeoBox): LatLng {
+private fun clampCenter(
+    c: LatLng,
+    zoom: Double,
+    size: IntSize,
+    density: Float,
+    box: GeoBox,
+): LatLng {
     val worldPx = 512.0 * 2.0.pow(zoom)
     val halfLng = (size.width / density / 2.0) / worldPx * 360.0
     val halfY = (size.height / density / 2.0) / worldPx
@@ -371,7 +420,10 @@ private fun mercatorY(lat: Double): Double {
 
 private fun latitudeOf(y: Double): Double = Math.toDegrees(atan(sinh(PI - 2 * PI * y)))
 
-private fun Style.setJson(sourceId: String, json: String) {
+private fun Style.setJson(
+    sourceId: String,
+    json: String,
+) {
     getSourceAs<GeoJsonSource>(sourceId)?.setGeoJson(json)
 }
 
@@ -387,8 +439,7 @@ private fun countryLabelsJson(countries: Collection<CountryInfo>): String {
                     JSONObject()
                         .put("country_id", c.id)
                         .put("name", c.name.uppercase()),
-                )
-                .put(
+                ).put(
                     "geometry",
                     JSONObject()
                         .put("type", "Point")
@@ -436,7 +487,10 @@ private fun Style.applyData(d: MapData) {
     )
 }
 
-private fun Style.setFilter(layerId: String, filter: Expression) {
+private fun Style.setFilter(
+    layerId: String,
+    filter: Expression,
+) {
     when (val layer = getLayer(layerId)) {
         is FillLayer -> layer.setFilter(filter)
         is LineLayer -> layer.setFilter(filter)
@@ -449,6 +503,7 @@ private fun Style.setFilter(layerId: String, filter: Expression) {
 private fun graticuleJson(step: Int): String {
     val sb = StringBuilder("""{"type":"FeatureCollection","features":[""")
     var first = true
+
     fun line(coords: String) {
         if (!first) sb.append(',')
         first = false

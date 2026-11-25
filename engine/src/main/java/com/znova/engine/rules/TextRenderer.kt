@@ -17,10 +17,12 @@ object TextRenderer {
                 key == "name" -> state.character.name
                 key == "age" -> state.character.ageYears.toString()
                 key == "year" -> state.currentYear.toString()
-                key == "country" -> content.pathOf(state.world.placeId)
-                    .firstOrNull { it.kind == "country" }
-                    ?.name
-                    .orEmpty()
+                key == "country" ->
+                    content
+                        .pathOf(state.world.placeId)
+                        .firstOrNull { it.kind == "country" }
+                        ?.name
+                        .orEmpty()
 
                 key == "money" -> state.character.money.toString()
                 key.startsWith("npc.") ->

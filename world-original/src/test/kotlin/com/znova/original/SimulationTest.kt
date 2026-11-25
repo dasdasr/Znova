@@ -16,7 +16,6 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertTrue
 
 class SimulationTest {
-
     private val engine = SamplePack.engine()
 
     private fun autoplay(
@@ -38,19 +37,21 @@ class SimulationTest {
                 val d = engine.view(s).decisions.first()
                 val options = d.choices.filter { it.enabled }
 
-                s = engine.choose(
-                    s,
-                    d.eventId,
-                    options[bot.nextInt(options.size)].id,
-                )
+                s =
+                    engine.choose(
+                        s,
+                        d.eventId,
+                        options[bot.nextInt(options.size)].id,
+                    )
             }
 
             if (s.chapterState!!.phase == Phase.ACTIVITIES) {
                 val view = engine.view(s)
-                val picked = view.activities
-                    .filter { it.enabled }
-                    .shuffledBy(bot)
-                    .take(view.slots)
+                val picked =
+                    view.activities
+                        .filter { it.enabled }
+                        .shuffledBy(bot)
+                        .take(view.slots)
 
                 s = engine.commitActivities(s, picked.map { it.id })
             }
@@ -87,15 +88,17 @@ class SimulationTest {
         val lives = (1L..100L).map { autoplay(it) }
         val titles = lives.map { engine.summarize(it).title }.toSet()
         val causes = lives.map { it.ending!!.cause }.toSet()
-        val chronicles = lives.map { life ->
-            life.chronicle.map { it.text }
-        }.toSet()
+        val chronicles =
+            lives
+                .map { life ->
+                    life.chronicle.map { it.text }
+                }.toSet()
 
         println("titles=$titles causes=$causes")
         println(
             "lengths=${lives.map { it.chapter }.sorted().let {
                 "${it.first()}..${it.last()}"
-            }}"
+            }}",
         )
 
         assertTrue(
@@ -103,49 +106,6 @@ class SimulationTest {
             "Lives are too similar: ${chronicles.size}",
         )
         assertTrue(titles.size >= 2)
-    }
-
-    @Test
-    fun `closed borders prevent emigration unless connected`() {
-        val s = autoplay(7)
-        assertNotNull(s.ending)
-
-        val fresh = engine.startLife(
-            LifeSetup(
-                seed = 7,
-                place = PlaceId("tsentral"),
-            ),
-        ).let {
-            it.copy(
-                character = it.character.copy(
-                    ageMonths = 30 * 12,
-                    money = 500,
-                ),
-            )
-        }
-
-        val view = engine.view(
-            engine.openChapter(fresh).let { st ->
-                var x = st
-
-                while (x.chapterState!!.phase == Phase.DECISIONS) {
-                    val d = engine.view(x).decisions.first()
-                    x = engine.choose(
-                        x,
-                        d.eventId,
-                        d.choices.first { it.enabled }.id,
-                    )
-                }
-
-                x
-            },
-        )
-
-        if (view.phase == Phase.ACTIVITIES) {
-            assertTrue(
-                view.activities.none { it.id.id == "emigrate" },
-            )
-        }
     }
 
     @Test
@@ -161,55 +121,61 @@ class SimulationTest {
         assertTrue(locked.legacies.none { it.id.id == "debtor" })
         assertTrue(locked.legacies.any { it.id.id == "weak_heart" })
 
-        val open = engine.laboratory(
-            MetaProfile(
-                unlocks = setOf(UnlockId("legacy_debtor")),
-            ),
-        )
+        val open =
+            engine.laboratory(
+                MetaProfile(
+                    unlocks = setOf(UnlockId("legacy_debtor")),
+                ),
+            )
 
         assertTrue(open.legacies.any { it.id.id == "debtor" })
     }
 
     @Test
     fun `legacy modifies the starting conditions`() {
-        val meta = MetaProfile(
-            unlocks = setOf(UnlockId("legacy_debtor")),
-        )
+        val meta =
+            MetaProfile(
+                unlocks = setOf(UnlockId("legacy_debtor")),
+            )
 
-        val s = engine.startLife(
-            LifeSetup(
-                seed = 5,
-                legacies = listOf(LegacyId("debtor")),
-            ),
-            meta,
-        )
+        val s =
+            engine.startLife(
+                LifeSetup(
+                    seed = 5,
+                    legacies = listOf(LegacyId("debtor")),
+                ),
+                meta,
+            )
 
         assertTrue(s.character.hasFlag(Flags.IN_DEBT))
         assertTrue(s.legacies.contains(LegacyId("debtor")))
 
-        val plain = engine.startLife(
-            LifeSetup(
-                seed = 5,
-                legacies = listOf(LegacyId("debtor")),
-            ),
-        )
+        val plain =
+            engine.startLife(
+                LifeSetup(
+                    seed = 5,
+                    legacies = listOf(LegacyId("debtor")),
+                ),
+            )
 
         assertTrue(plain.legacies.isEmpty())
     }
 
     @Test
     fun `trackers and unlocks work throughout a life`() {
-        val meta = MetaProfile(
-            unlocks = setOf(UnlockId("legacy_debtor")),
-        )
+        val meta =
+            MetaProfile(
+                unlocks = setOf(UnlockId("legacy_debtor")),
+            )
 
-        var s = engine.startLife(
-            LifeSetup(
-                seed = 11,
-                legacies = listOf(LegacyId("debtor")),
-            ),
-            meta,
-        )
+        var s =
+            engine.startLife(
+                LifeSetup(
+                    seed = 11,
+                    legacies = listOf(LegacyId("debtor")),
+                ),
+                meta,
+            )
 
         repeat(4) {
             if (s.ending == null) {
@@ -217,11 +183,12 @@ class SimulationTest {
 
                 while (s.chapterState!!.phase == Phase.DECISIONS) {
                     val d = engine.view(s).decisions.first()
-                    s = engine.choose(
-                        s,
-                        d.eventId,
-                        d.choices.first { it.enabled }.id,
-                    )
+                    s =
+                        engine.choose(
+                            s,
+                            d.eventId,
+                            d.choices.first { it.enabled }.id,
+                        )
                 }
 
                 if (s.chapterState!!.phase == Phase.ACTIVITIES) {

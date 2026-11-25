@@ -3,11 +3,21 @@ package com.znova.presentation.ui.map
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -31,7 +41,10 @@ internal val theme: PackTheme
     @Composable get() = LocalTheme.current
 
 @Composable
-internal fun DragHandle(modifier: Modifier, onToggle: () -> Unit) {
+internal fun DragHandle(
+    modifier: Modifier,
+    onToggle: () -> Unit,
+) {
     Box(
         modifier
             .fillMaxWidth()
@@ -64,7 +77,11 @@ internal fun CloseButton(onClose: () -> Unit) {
 
 // -> FeldSegmentedControl
 @Composable
-internal fun DossierTabs(titles: List<String>, selected: Int, onSelect: (Int) -> Unit) {
+internal fun DossierTabs(
+    titles: List<String>,
+    selected: Int,
+    onSelect: (Int) -> Unit,
+) {
     val skin = theme
     val shape = RoundedCornerShape(skin.tabCorner)
     Row(
@@ -94,7 +111,10 @@ internal fun DossierTabs(titles: List<String>, selected: Int, onSelect: (Int) ->
 
 // -> FeldCard
 @Composable
-internal fun DossierCard(modifier: Modifier = Modifier, body: @Composable ColumnScope.() -> Unit) {
+internal fun DossierCard(
+    modifier: Modifier = Modifier,
+    body: @Composable ColumnScope.() -> Unit,
+) {
     val shape = RoundedCornerShape(theme.cardCorner)
     Column(
         Modifier
@@ -116,7 +136,10 @@ internal fun DossierDivider() {
 
 // -> FeldSectionHeader
 @Composable
-internal fun Section(title: String, body: @Composable () -> Unit) {
+internal fun Section(
+    title: String,
+    body: @Composable () -> Unit,
+) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Label(title, theme.accent)
         body()
@@ -124,7 +147,11 @@ internal fun Section(title: String, body: @Composable () -> Unit) {
 }
 
 @Composable
-internal fun VerdictRow(title: String, text: String, color: Color) {
+internal fun VerdictRow(
+    title: String,
+    text: String,
+    color: Color,
+) {
     Row(
         Modifier.padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
@@ -137,7 +164,10 @@ internal fun VerdictRow(title: String, text: String, color: Color) {
 
 // -> FeldChip not clickable
 @Composable
-internal fun DossierChip(text: String, color: Color) {
+internal fun DossierChip(
+    text: String,
+    color: Color,
+) {
     val shape = RoundedCornerShape(theme.chipCorner)
     Body(
         text,
@@ -151,7 +181,11 @@ internal fun DossierChip(text: String, color: Color) {
 }
 
 @Composable
-internal fun Label(text: String, color: Color, modifier: Modifier = Modifier) {
+internal fun Label(
+    text: String,
+    color: Color,
+    modifier: Modifier = Modifier,
+) {
     Text(
         text.uppercase(),
         modifier = modifier,

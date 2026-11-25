@@ -51,9 +51,10 @@ fun MapScreen(
     val presentation = packPresentations[packId]
     val mapAssets = presentation?.map
 
-    val contentPack = remember {
-        OriginalPack.content()
-    }
+    val contentPack =
+        remember {
+            OriginalPack.content()
+        }
 
     var data by remember { mutableStateOf<MapData?>(null) }
     var error by remember { mutableStateOf<String?>(null) }
@@ -66,8 +67,7 @@ fun MapScreen(
 
         runCatching {
             MapDataLoader.load(context, mapAssets)
-        }
-            .onSuccess { data = it }
+        }.onSuccess { data = it }
             .onFailure { error = it.stackTraceToString() }
     }
 
@@ -106,7 +106,7 @@ private fun MapContent(
     Box(
         Modifier
             .fillMaxSize()
-            .border(2.dp, Ink)
+            .border(2.dp, Ink),
     ) {
         ZnovaMap(
             data = data,
@@ -118,18 +118,21 @@ private fun MapContent(
         Column(
             Modifier
                 .align(Alignment.TopStart)
-                .padding(12.dp), verticalArrangement = Arrangement.spacedBy(10.dp)
+                .padding(12.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
         ) {
             StampButton("<", onBack)
             StampButton("+", { state.zoomBy(1.0) })
             StampButton("-", { state.zoomBy(-1.0) })
         }
         StampButton(
-            "CITIES", { state.showAllCities = !state.showAllCities },
+            "CITIES",
+            { state.showAllCities = !state.showAllCities },
             active = state.showAllCities,
-            modifier = Modifier
-                .align(Alignment.TopEnd)
-                .padding(12.dp),
+            modifier =
+                Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(12.dp),
         )
 
         AnimatedVisibility(
@@ -140,10 +143,11 @@ private fun MapContent(
         ) {
             lastSelection?.let { selected ->
                 InfoSheet(
-                    placeId = when (selected) {
-                        is MapSelection.Country -> PlaceId("country:${selected.info.id}")
-                        is MapSelection.City -> PlaceId("city:${selected.info.id}")
-                    },
+                    placeId =
+                        when (selected) {
+                            is MapSelection.Country -> PlaceId("country:${selected.info.id}")
+                            is MapSelection.City -> PlaceId("city:${selected.info.id}")
+                        },
                     content = content,
                     packTheme = theme,
                     packMapUi = mapUi,
@@ -159,7 +163,12 @@ private fun MapContent(
 }
 
 @Composable
-internal fun StampButton(label: String, onClick: () -> Unit, modifier: Modifier = Modifier, active: Boolean = false) {
+internal fun StampButton(
+    label: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    active: Boolean = false,
+) {
     Box(
         modifier
             .defaultMinSize(minWidth = 44.dp, minHeight = 44.dp)
@@ -175,7 +184,7 @@ internal fun StampButton(label: String, onClick: () -> Unit, modifier: Modifier 
             color = if (active) Paper else Ink,
             fontFamily = FontFamily.Monospace,
             fontWeight = FontWeight.Bold,
-            fontSize = 14.sp
+            fontSize = 14.sp,
         )
     }
 }

@@ -50,15 +50,17 @@ class GameEngine(
         val rng = Rng(setup.seed)
         val schema = content.schema
 
-        val starts = content.places.values.filter {
-            it.startable && it.isAvailable(meta.unlocks)
-        }
+        val starts =
+            content.places.values.filter {
+                it.startable && it.isAvailable(meta.unlocks)
+            }
 
-        val start = setup.place?.let {
-            content.places[it]
-                ?: error("Unknown start place: ${it.id}")
-        } ?: rng.weighted(starts) { it.weight }
-        ?: error("No available start places in ContentPack")
+        val start =
+            setup.place?.let {
+                content.places[it]
+                    ?: error("Unknown start place: ${it.id}")
+            } ?: rng.weighted(starts) { it.weight }
+                ?: error("No available start places in ContentPack")
 
         require(start.startable) {
             "Place ${start.id.id} is not startable"
@@ -67,15 +69,20 @@ class GameEngine(
             "Place ${start.id.id} is locked"
         }
 
-        val names = content.namesOf(start.id)
-            ?: error("Place ${start.id.id} has no name pool")
+        val names =
+            content.namesOf(start.id)
+                ?: error("Place ${start.id.id} has no name pool")
 
-        val skills = schema.skills.keys.associateWith { 0 }.toMutableMap()
+        val skills =
+            schema.skills.keys
+                .associateWith { 0 }
+                .toMutableMap()
 
         repeat(schema.startSkillPoints) {
-            val open = schema.skills.keys.filter {
-                skills.getValue(it) < schema.startSkillCap
-            }
+            val open =
+                schema.skills.keys.filter {
+                    skills.getValue(it) < schema.startSkillCap
+                }
             check(open.isNotEmpty()) {
                 "Not enough skill capacity for startSkillPoints"
             }
@@ -84,73 +91,88 @@ class GameEngine(
             skills[key] = skills.getValue(key) + 1
         }
 
-        val views = schema.views.keys.associateWith {
-            rng.nextInt(schema.viewSpread * 2 + 1) - schema.viewSpread
-        }
+        val views =
+            schema.views.keys.associateWith {
+                rng.nextInt(schema.viewSpread * 2 + 1) - schema.viewSpread
+            }
 
-        val years = content.startYearsOf(start.id)
-            ?: config.defaultStartYears
+        val years =
+            content.startYearsOf(start.id)
+                ?: config.defaultStartYears
 
-        var state = LifeState(
-            packId = content.packId,
-            seed = setup.seed,
-            character = Character(
-                name = setup.name ?: names.pick(rng),
-                ageMonths = 0,
-                money = 0,
-                stats = schema.stats.values.associate {
-                    it.key to it.start
-                },
-                skills = skills,
-                views = views,
-            ),
-            world = content.moveWorld(
-                World(
-                    startDate = setup.startDate ?: WorldDate(
-                        year = years.first + rng.nextInt(years.last - years.first + 1),
-                        month = 1,
+        var state =
+            LifeState(
+                packId = content.packId,
+                seed = setup.seed,
+                character =
+                    Character(
+                        name = setup.name ?: names.pick(rng),
+                        ageMonths = 0,
+                        money = 0,
+                        stats =
+                            schema.stats.values.associate {
+                                it.key to it.start
+                            },
+                        skills = skills,
+                        views = views,
                     ),
-                    placeId = start.id,
-                ),
-                start.id,
-            ),
-            unlocks = meta.unlocks,
-            focus = setup.focus?.takeIf {
-                content.foci[it]?.isAvailable(meta.unlocks) == true
-            },
-            pastLives = meta.archive.takeLast(config.maxPastLives),
-        )
+                world =
+                    content.moveWorld(
+                        World(
+                            startDate =
+                                setup.startDate ?: WorldDate(
+                                    year = years.first + rng.nextInt(years.last - years.first + 1),
+                                    month = 1,
+                                ),
+                            placeId = start.id,
+                        ),
+                        start.id,
+                    ),
+                unlocks = meta.unlocks,
+                focus =
+                    setup.focus?.takeIf {
+                        content.foci[it]?.isAvailable(meta.unlocks) == true
+                    },
+                pastLives = meta.archive.takeLast(config.maxPastLives),
+            )
 
-        val chosen = setup.legacies
-            .mapNotNull { content.legacies[it] }
-            .filter { it.isAvailable(meta.unlocks) }
-            .distinct()
-            .take(config.legacySlots)
+        val chosen =
+            setup.legacies
+                .mapNotNull { content.legacies[it] }
+                .filter { it.isAvailable(meta.unlocks) }
+                .distinct()
+                .take(config.legacySlots)
 
         state = state.copy(legacies = chosen.map { it.id }.toSet())
 
-        val placeEffects = content.pathOf(start.id)
-            .reversed()
-            .flatMap { it.onStart }
+        val placeEffects =
+            content
+                .pathOf(start.id)
+                .reversed()
+                .flatMap { it.onStart }
 
-        state = applyAll(
-            state,
-            chosen.flatMap { it.onStart } + placeEffects,
-            rng,
-        )
+        state =
+            applyAll(
+                state,
+                chosen.flatMap { it.onStart } + placeEffects,
+                rng,
+            )
 
-        val requestedOrigin = setup.origin
-            ?.let { content.origins[it] }
-            ?.takeIf { it.isAvailable(meta.unlocks) }
+        val requestedOrigin =
+            setup.origin
+                ?.let { content.origins[it] }
+                ?.takeIf { it.isAvailable(meta.unlocks) }
 
-        val origin = requestedOrigin ?: run {
-            val candidates = content.origins.values.filter { origin ->
-                origin.isAvailable(meta.unlocks) &&
-                    origin.conditions.all { it.test(state) }
+        val origin =
+            requestedOrigin ?: run {
+                val candidates =
+                    content.origins.values.filter { origin ->
+                        origin.isAvailable(meta.unlocks) &&
+                            origin.conditions.all { it.test(state) }
+                    }
+
+                rng.weighted(candidates) { it.weight }
             }
-
-            rng.weighted(candidates) { it.weight }
-        }
 
         if (origin != null) {
             state = state.copy(origin = origin.id)
@@ -331,7 +353,10 @@ class GameEngine(
         if (s.ending == null) {
             s = applyAll(s, content.upkeep, rng)
             val months = s.chapterState!!.lengthMonths
-            s = s.mapCharacter { it.copy(ageMonths = it.ageMonths + months) }
+            s =
+                s
+                    .mapCharacter { it.copy(ageMonths = it.ageMonths + months) }
+                    .copy(worldMonthsElapsed = s.worldMonthsElapsed + months)
             s = vitals(s)
             if (s.ending == null) s = updateTrackers(s)
             if (s.ending == null && rng.chance(config.mortality.deathChance(s, months))) s = s.endLife("natural")
@@ -398,18 +423,20 @@ class GameEngine(
 
     fun summarize(state: LifeState): LifeSummary {
         val ending = checkNotNull(state.ending) { "Life has not ended" }
-        val title = content.titles
-            .firstOrNull { t -> t.conditions.all { it.test(state) } }
-            ?.text ?: config.defaultTitle
+        val title =
+            content.titles
+                .firstOrNull { t -> t.conditions.all { it.test(state) } }
+                ?.text ?: config.defaultTitle
 
         val byImportance =
             compareBy<ChronicleEntry> { it.tier.ordinal }
                 .thenBy { it.chapter }
 
-        val highlights = state.chronicle
-            .sortedWith(byImportance)
-            .take(config.highlightsInSummary)
-            .sortedBy { it.chapter }
+        val highlights =
+            state.chronicle
+                .sortedWith(byImportance)
+                .take(config.highlightsInSummary)
+                .sortedBy { it.chapter }
 
         return LifeSummary(
             name = state.character.name,
@@ -450,22 +477,27 @@ class GameEngine(
 
     fun laboratory(meta: MetaProfile): LaboratoryView =
         LaboratoryView(
-            places = content.places.values.filter {
-                it.startable && it.isAvailable(meta.unlocks)
-            },
-            origins = content.origins.values.filter {
-                it.isAvailable(meta.unlocks)
-            },
-            legacies = content.legacies.values.filter {
-                it.isAvailable(meta.unlocks)
-            },
-            foci = content.foci.values.filter {
-                it.isAvailable(meta.unlocks)
-            },
+            places =
+                content.places.values.filter {
+                    it.startable && it.isAvailable(meta.unlocks)
+                },
+            origins =
+                content.origins.values.filter {
+                    it.isAvailable(meta.unlocks)
+                },
+            legacies =
+                content.legacies.values.filter {
+                    it.isAvailable(meta.unlocks)
+                },
+            foci =
+                content.foci.values.filter {
+                    it.isAvailable(meta.unlocks)
+                },
             legacySlots = config.legacySlots,
-            openGoals = content.achievements.values.filter {
-                !it.hidden && it.id !in meta.achievements
-            },
+            openGoals =
+                content.achievements.values.filter {
+                    !it.hidden && it.id !in meta.achievements
+                },
             archive = meta.archive,
         )
 
@@ -482,7 +514,8 @@ class GameEngine(
         state.legacies
             .mapNotNull { content.legacies[it] }
             .flatMap { it.gameModifiers } +
-            content.pathOf(state.world.placeId)
+            content
+                .pathOf(state.world.placeId)
                 .reversed()
                 .flatMap { it.gameModifiers }
 

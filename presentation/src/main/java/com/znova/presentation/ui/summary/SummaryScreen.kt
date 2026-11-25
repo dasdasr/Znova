@@ -21,44 +21,57 @@ import com.znova.app.GameViewModel
 import com.znova.presentation.ui.section
 import kotlinx.coroutines.launch
 
-
 @Composable
-internal fun SummaryScreen(state: GameViewModel.UiState, vm: GameViewModel) {
+internal fun SummaryScreen(
+    state: GameViewModel.UiState,
+    vm: GameViewModel,
+) {
     val summary = state.summary ?: return
     val clipboard = LocalClipboard.current
     val scope = rememberCoroutineScope()
 
-    val history = buildString {
-        appendLine(summary.title)
-        appendLine("Died at ${summary.ageYears}")
-        appendLine("Cause: ${summary.cause}")
-        appendLine()
+    val history =
+        buildString {
+            appendLine(summary.title)
+            appendLine("Died at ${summary.ageYears}")
+            appendLine("Cause: ${summary.cause}")
+            appendLine()
 
-        appendLine("ACHIEVEMENTS")
-        if (summary.achievements.isEmpty()) appendLine("None")
-        else summary.achievements.forEach { appendLine("- $it") }
+            appendLine("ACHIEVEMENTS")
+            if (summary.achievements.isEmpty()) {
+                appendLine("None")
+            } else {
+                summary.achievements.forEach { appendLine("- $it") }
+            }
 
-        appendLine()
-        appendLine("UNLOCKS")
-        if (summary.unlocks.isEmpty()) appendLine("None")
-        else summary.unlocks.forEach { appendLine("- $it") }
+            appendLine()
+            appendLine("UNLOCKS")
+            if (summary.unlocks.isEmpty()) {
+                appendLine("None")
+            } else {
+                summary.unlocks.forEach { appendLine("- $it") }
+            }
 
-        appendLine()
-        appendLine("ARCHIVE GAPS")
-        if (summary.gaps.isEmpty()) appendLine("None")
-        else summary.gaps.forEach { appendLine("- $it") }
+            appendLine()
+            appendLine("ARCHIVE GAPS")
+            if (summary.gaps.isEmpty()) {
+                appendLine("None")
+            } else {
+                summary.gaps.forEach { appendLine("- $it") }
+            }
 
-        appendLine()
-        appendLine("LIFE CHRONICLE")
-        summary.chronicle.forEachIndexed { index, entry ->
-            appendLine("${index + 1}. $entry")
-        }
-    }.trim()
+            appendLine()
+            appendLine("LIFE CHRONICLE")
+            summary.chronicle.forEachIndexed { index, entry ->
+                appendLine("${index + 1}. $entry")
+            }
+        }.trim()
 
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         item {
@@ -91,7 +104,7 @@ internal fun SummaryScreen(state: GameViewModel.UiState, vm: GameViewModel) {
             Button(onClick = {
                 scope.launch {
                     clipboard.setClipEntry(
-                        ClipEntry(ClipData.newPlainText("Life history", history))
+                        ClipEntry(ClipData.newPlainText("Life history", history)),
                     )
                 }
             }) {

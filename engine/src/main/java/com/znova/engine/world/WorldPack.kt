@@ -15,10 +15,13 @@ interface WorldPack {
     val modules: List<ContentModule>
 
     fun content(): ContentPack = ContentBuilder(id, schema).also { b -> modules.forEach(b::install) }.build()
+
     fun engine() = GameEngine(content(), config)
 }
 
-class PackRegistry(packs: List<WorldPack>) {
+class PackRegistry(
+    packs: List<WorldPack>,
+) {
     private val byId = packs.associateBy { it.id }
 
     init {
@@ -26,5 +29,6 @@ class PackRegistry(packs: List<WorldPack>) {
     }
 
     val all: List<WorldPack> get() = byId.values.toList()
+
     operator fun get(id: String) = byId[id] ?: error("Unknown pack $id")
 }

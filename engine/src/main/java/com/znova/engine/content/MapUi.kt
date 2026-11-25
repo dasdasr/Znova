@@ -24,11 +24,18 @@ data class KindUi(
     val facts: List<FactUi> = emptyList(),
 )
 
-data class AxisUi(val label: String, val bad: String, val good: String)
+data class AxisUi(
+    val label: String,
+    val bad: String,
+    val good: String,
+)
 
 enum class Tone { GOOD, BAD, NEUTRAL }
 
-data class TagUi(val label: String? = null, val tone: Tone = Tone.NEUTRAL)
+data class TagUi(
+    val label: String? = null,
+    val tone: Tone = Tone.NEUTRAL,
+)
 
 enum class FactFormat { TEXT, HUMANIZE, AFTER_COLON, PLACE_REF }
 

@@ -68,34 +68,45 @@ fun ZnovaRoot(vm: GameViewModel) {
         }
     }
 }
+
 @Composable
 internal fun CardRow(card: GameCard) {
-    val style = when (card.tier) {
-        Tier.MAJOR -> MaterialTheme.typography.titleLarge
-        Tier.MEDIUM -> MaterialTheme.typography.bodyLarge
-        Tier.MINOR -> MaterialTheme.typography.bodySmall
-    }
-    val prefix = buildString {
-        card.voice?.let { append("[${it.keyLabel()}] ") }
-        if (card.observer) append("(observer) ")
-    }
+    val style =
+        when (card.tier) {
+            Tier.MAJOR -> MaterialTheme.typography.titleLarge
+            Tier.MEDIUM -> MaterialTheme.typography.bodyLarge
+            Tier.MINOR -> MaterialTheme.typography.bodySmall
+        }
+    val prefix =
+        buildString {
+            card.voice?.let { append("[${it.keyLabel()}] ") }
+            if (card.observer) append("(observer) ")
+        }
     val suffix = card.check?.let { " [check: $it]" }.orEmpty()
     Text(prefix + card.text + suffix, style = style)
 }
 
 @Composable
-internal fun ChapterPanel(chapter: ChapterUi, picked: Set<ActivityId>, vm: GameViewModel) {
+internal fun ChapterPanel(
+    chapter: ChapterUi,
+    picked: Set<ActivityId>,
+    vm: GameViewModel,
+) {
     when (chapter.phase) {
         Phase.DECISIONS -> chapter.decision?.let { DecisionPanel(it, vm::choose) }
         Phase.ACTIVITIES -> ActivitiesPanel(chapter, picked, vm::toggleActivity, vm::commit)
-        Phase.CLOSED -> Button(onClick = vm::continueChapter, modifier = Modifier.fillMaxWidth()) {
-            Text("Continue")
-        }
+        Phase.CLOSED ->
+            Button(onClick = vm::continueChapter, modifier = Modifier.fillMaxWidth()) {
+                Text("Continue")
+            }
     }
 }
 
 @Composable
-internal fun DecisionPanel(decision: DecisionUi, onChoose: (EventId, ChoiceId) -> Unit) {
+internal fun DecisionPanel(
+    decision: DecisionUi,
+    onChoose: (EventId, ChoiceId) -> Unit,
+) {
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         Text(decision.text, style = MaterialTheme.typography.titleMedium)
         decision.choices.forEach { choice ->
@@ -141,7 +152,10 @@ internal fun ActivitiesPanel(
     }
 }
 
-internal fun LazyListScope.section(title: String, lines: List<String>) {
+internal fun LazyListScope.section(
+    title: String,
+    lines: List<String>,
+) {
     if (lines.isEmpty()) return
     item { Text(title, style = MaterialTheme.typography.titleMedium) }
     items(lines) { Text("- $it") }
