@@ -25,6 +25,7 @@ class EffectContext(
     val rng: Rng,
     val content: ContentPack,
     val gameModifiers: List<GameModifier>,
+    val bindings: Bindings = Bindings.EMPTY,
 )
 
 interface Effect {
@@ -64,7 +65,7 @@ data class ChangeStat(
                 stats =
                     it.stats + (
                         stat to ctx.content.schema.clampStat(stat, it.stat(stat) + d)
-                    ),
+                        ),
             )
         }
     }
@@ -82,7 +83,7 @@ data class ChangeSkill(
             skills =
                 it.skills + (
                     skill to ctx.content.schema.clampSkill(skill, it.skill(skill) + delta)
-                ),
+                    ),
         )
     }
 }
@@ -99,7 +100,7 @@ data class ShiftView(
             views =
                 it.views + (
                     view to ctx.content.schema.clampView(view, it.view(view) + delta)
-                ),
+                    ),
         )
     }
 }

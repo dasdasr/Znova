@@ -46,6 +46,8 @@ data class LifeSetup(
     val startDate: WorldDate? = null,
     val focus: FocusId? = null,
     val legacies: List<LegacyId> = emptyList(),
+    val scenario: String? = null,
+    val startAgeYears: Int? = null,
 )
 
 data class ConcludeResult(

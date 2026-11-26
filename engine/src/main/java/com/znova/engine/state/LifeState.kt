@@ -16,6 +16,7 @@ import com.znova.engine.core.TagKey
 import com.znova.engine.core.TrackerId
 import com.znova.engine.core.UnlockId
 import com.znova.engine.core.ViewKey
+import com.znova.engine.life.MonthlyState
 import com.znova.engine.meta.LifeSummary
 import com.znova.engine.rules.CheckResult
 
@@ -146,6 +147,7 @@ data class LifeState(
     val pastLives: List<LifeSummary> = emptyList(),
     val chapterState: ChapterState? = null,
     val ending: LifeEnding? = null,
+    val monthly: MonthlyState? = null,
 ) {
     val currentDate: WorldDate
         get() {

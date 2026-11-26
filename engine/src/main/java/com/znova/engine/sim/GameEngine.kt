@@ -14,6 +14,7 @@ import com.znova.engine.meta.LaboratoryView
 import com.znova.engine.meta.LifeSetup
 import com.znova.engine.meta.LifeSummary
 import com.znova.engine.meta.MetaProfile
+import com.znova.engine.rules.Bindings
 import com.znova.engine.rules.CheckMath
 import com.znova.engine.rules.CheckResult
 import com.znova.engine.rules.Effect
@@ -510,7 +511,7 @@ class GameEngine(
         return block(rng).copy(rngDraws = rng.draws)
     }
 
-    private fun modifiersFor(state: LifeState): List<GameModifier> =
+    internal fun modifiersFor(state: LifeState): List<GameModifier> =
         state.legacies
             .mapNotNull { content.legacies[it] }
             .flatMap { it.gameModifiers } +
@@ -519,12 +520,13 @@ class GameEngine(
                 .reversed()
                 .flatMap { it.gameModifiers }
 
-    private fun applyAll(
+    internal fun applyAll(
         state: LifeState,
         effects: List<Effect>,
         rng: Rng,
+        bindings: Bindings = Bindings.EMPTY,
     ): LifeState {
-        val ctx = EffectContext(rng, content, modifiersFor(state))
+        val ctx = EffectContext(rng, content, modifiersFor(state), bindings)
         var s = state
         for (e in effects) {
             if (s.ending != null) break
@@ -579,12 +581,12 @@ class GameEngine(
         }
     }
 
-    private fun isVisible(
+    internal fun isVisible(
         s: LifeState,
         c: ChoiceDef,
     ): Boolean = modifiersFor(s).fold(c.visibleWhen.all { it.test(s) }) { acc, m -> m.choiceVisible(s, c, acc) }
 
-    private fun isEnabled(
+    internal fun isEnabled(
         s: LifeState,
         c: ChoiceDef,
     ): Boolean = modifiersFor(s).fold(c.enabledWhen.all { it.test(s) }) { acc, m -> m.choiceEnabled(s, c, acc) }
@@ -610,7 +612,7 @@ class GameEngine(
         return CheckPreview(check.skill, check.difficulty, CheckMath.chancePercent(modifier, check.difficulty))
     }
 
-    private fun updateTrackers(s: LifeState): LifeState {
+    internal fun updateTrackers(s: LifeState): LifeState {
         if (content.trackers.isEmpty()) return s
         val updated =
             content.trackers.values.associate { t ->
@@ -643,7 +645,7 @@ class GameEngine(
         phase: Phase,
     ): LifeState = s.copy(chapterState = s.chapterState?.copy(phase = phase))
 
-    private fun vitals(s: LifeState): LifeState =
+    internal fun vitals(s: LifeState): LifeState =
         if (
             s.ending == null &&
             s.character.stat(content.schema.vitalStat) <= 0
